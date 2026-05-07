@@ -2447,7 +2447,6 @@ function ProductConfigModal({ item, theme, onClose, onIncrement, onDecrement, on
 
 function CoursesTab({ week, recipes, theme }) {
   const [quickMode, setQuickMode] = useState(false);
-  const [storeMode, setStoreMode] = useState(false);
   const [manualInput, setManualInput] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [categoryOrder, setCategoryOrder] = useState(() => {
@@ -2775,8 +2774,8 @@ function CoursesTab({ week, recipes, theme }) {
       )}
       <div style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap",marginBottom:14}}>
         <div>
-          <h1 style={{margin:"0 0 6px 0",fontSize:24}}>Liste de courses</h1>
-          <div style={{color:theme.muted,fontSize:13}}>v12.4.1 : mode magasin clean.</div>
+          <h1 style={{margin:"0 0 6px 0",fontSize:24}}>Liste de courses · Mode magasin bientôt actif</h1>
+          <div style={{color:theme.muted,fontSize:13}}>v12.4.2 : build fix + mode magasin.</div>
         </div>
         <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
           <div style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:16,padding:"12px 16px",boxShadow:theme.shadow}}>
@@ -2785,7 +2784,7 @@ function CoursesTab({ week, recipes, theme }) {
           <button className="micro-btn" onClick={() => setQuickMode(v => !v)} style={{
             padding:"12px 16px",borderRadius:14,border:`1px solid ${quickMode ? theme.accent : theme.border}`,
             background:quickMode ? theme.accentSoft : theme.surface,color:quickMode ? theme.accent : theme.text,fontWeight:900,cursor:"pointer"
-          }}>{quickMode ? "Vue détaillée" : "Mode rapide"}</button><button className="micro-btn" onClick={() => setStoreMode(v => !v)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${storeMode ? theme.accent : theme.border}`,background:storeMode ? theme.accentSoft : theme.surface,color:storeMode ? theme.accent : theme.text,fontWeight:900,cursor:"pointer"}}>{storeMode ? "Quitter magasin" : "Mode magasin"}</button>
+          }}>{quickMode ? "Vue détaillée" : "Mode rapide"}</button>
           <button className="micro-btn" onClick={clearBought} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>
             Vider achetés
           </button>
@@ -2816,7 +2815,7 @@ function CoursesTab({ week, recipes, theme }) {
       <div style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:22,padding:16,boxShadow:theme.shadow,marginBottom:16}}>
         <div style={{display:"flex",justifyContent:"space-between",gap:10,alignItems:"center",marginBottom:10,flexWrap:"wrap"}}>
           <div>
-            <div style={{fontWeight:900,fontSize:16}}>Mode magasin clean</div>
+            <div style={{fontWeight:900,fontSize:16}}>Import URL proxy</div>
             <div style={{fontSize:12,color:theme.muted,marginTop:3}}>Adapte l’ordre à ton magasin.</div>
           </div>
           <button type="button" className="micro-btn" onClick={resetCategoryOrder} style={{padding:"9px 12px",borderRadius:12,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>
@@ -2837,10 +2836,6 @@ function CoursesTab({ week, recipes, theme }) {
         </div>
       </div>
 
-      {storeMode && <div style={{position:"sticky",top:10,zIndex:40,background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:22,padding:14,boxShadow:theme.shadowStrong,marginBottom:16}}>
-<div style={{fontWeight:950,fontSize:18}}>🛒 Mode magasin</div>
-<div style={{fontSize:12,color:theme.muted,marginTop:4}}>Version 12.4.1 active — parcours rayon par rayon.</div>
-</div>}
       {activeShoppingList.length === 0 ? (
         <div style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:18,color:theme.muted,marginBottom:16}}>
           Liste vide. Ajoute des recettes au planning ou ajoute un article manuellement.
@@ -2893,7 +2888,7 @@ function CoursesTab({ week, recipes, theme }) {
 function RecipesTab({recipes,theme,onSelectRecipe,onEditRecipe,onCreateRecipe,onImportRecipe,onToggleFavorite}) {
  const [search,setSearch]=useState(""); const [typeFilter,setTypeFilter]=useState("all"); const [favOnly,setFavOnly]=useState(false);
  const filtered=recipes.filter(r=>{const recipeSearchText = normalizeIngredients(r.ingredients||[]).map(ingredientText).join(" "); const txt=`${r.name} ${recipeSearchText} ${(r.tags||[]).join(" ")}`.toLowerCase(); return (!search.trim()||txt.includes(search.toLowerCase()))&&(typeFilter==="all"||r.mealType===typeFilter)&&(!favOnly||r.favorite)});
- return <div className="card-enter"><div style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap",marginBottom:14}}><div><h1 style={{margin:"0 0 6px 0",fontSize:24}}>Carnet de recettes</h1><div style={{color:theme.muted,fontSize:13}}>v12.4.1 : mode magasin clean.</div></div><div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button className="micro-btn" onClick={onCreateRecipe} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:900,cursor:"pointer"}}>+ Nouvelle recette / importer</button><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher..." style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,minWidth:240}} /><select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800}}><option value="all">Tous types</option><option value="light">Léger</option><option value="balanced">Équilibré</option><option value="single">Plat unique</option></select><button className="micro-btn" onClick={()=>setFavOnly(v=>!v)} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${favOnly?theme.accent:theme.border}`,background:favOnly?theme.accentSoft:theme.surface,color:favOnly?theme.accent:theme.text,fontWeight:800,cursor:"pointer"}}>⭐ Favoris</button></div></div>
+ return <div className="card-enter"><div style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap",marginBottom:14}}><div><h1 style={{margin:"0 0 6px 0",fontSize:24}}>Carnet de recettes</h1><div style={{color:theme.muted,fontSize:13}}>v12.4.2 : build fix + mode magasin.</div></div><div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button className="micro-btn" onClick={onCreateRecipe} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:900,cursor:"pointer"}}>+ Nouvelle recette / importer</button><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher..." style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,minWidth:240}} /><select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800}}><option value="all">Tous types</option><option value="light">Léger</option><option value="balanced">Équilibré</option><option value="single">Plat unique</option></select><button className="micro-btn" onClick={()=>setFavOnly(v=>!v)} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${favOnly?theme.accent:theme.border}`,background:favOnly?theme.accentSoft:theme.surface,color:favOnly?theme.accent:theme.text,fontWeight:800,cursor:"pointer"}}>⭐ Favoris</button></div></div>
  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:12}}>{filtered.map(r=><div key={r.id} className="card-enter premium-hover" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:14,boxShadow:theme.shadow,transition:"transform .14s ease"}}><div style={{height:78,borderRadius:16,background:theme.surface2,border:`1px solid ${theme.border}`,display:"flex",alignItems:"center",justifyContent:"center",color:theme.muted,fontSize:12,overflow:"hidden"}}>{getRecipePhoto(r)?<img src={getRecipePhoto(r)} alt={r.name} onError={e=>{e.currentTarget.style.display="none"}} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:"photo recette"}</div><div style={{display:"flex",justifyContent:"space-between",gap:10,alignItems:"start",marginTop:12}}><div><div style={{fontWeight:900,fontSize:16}}>{r.name}</div><div style={{color:theme.muted,fontSize:12,marginTop:5}}>{typeLabel(r.mealType)} • {r.device||"—"}</div></div><button className="micro-btn" onClick={()=>onToggleFavorite(r.id)} style={{border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,borderRadius:12,width:34,height:34,cursor:"pointer"}}>{r.favorite?"⭐":"☆"}</button></div><div style={{color:theme.muted,fontSize:12,marginTop:10,minHeight:32}}>{normalizeIngredients(r.ingredients||[]).slice(0,4).map(ingredientText).join(", ")}</div><div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:10}}>{(r.tags||[]).slice(0,3).map(t=><span key={t} style={{fontSize:11,padding:"4px 8px",borderRadius:999,border:`1px solid ${theme.border}`,color:theme.muted}}>#{t}</span>)}</div><div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:12}}><button className="micro-btn" onClick={()=>onSelectRecipe(r.id)} style={{padding:"9px 12px",borderRadius:12,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800,cursor:"pointer"}}>Voir</button><button className="micro-btn" onClick={()=>onEditRecipe(r.id)} style={{padding:"9px 12px",borderRadius:12,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:800,cursor:"pointer"}}>Modifier</button></div></div>)}</div>{filtered.length===0&&<div style={{marginTop:16,background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:18,color:theme.muted}}>Aucune recette.</div>}</div>
 }
 
@@ -2902,17 +2897,17 @@ function WhatsNewModal({ theme, onClose }) {
   const items = [
     "Ajout rapide manuel depuis les courses.",
     "Suggestions en boutons arrondis.",
-    "Mode magasin clean personnalisable dans les courses.",
+    "Import URL proxy personnalisable dans les courses.",
     "Historique des articles utilisés récemment.",
-    "Mode magasin clean avec + / − / supprimer."
+    "Import URL proxy avec + / − / supprimer."
   ];
 
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.48)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:120,padding:20}}>
       <div className="modal-pop" style={{width:"min(560px,100%)",background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:24,boxShadow:theme.shadowStrong,padding:26,textAlign:"center"}}>
         <div style={{width:72,height:72,borderRadius:999,border:`3px solid ${theme.accent}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 18px",fontSize:34,color:theme.accent}}>✓</div>
-        <div style={{fontWeight:900,fontSize:28,marginBottom:6}}>Version 12.4.1</div>
-        <div style={{color:theme.accent,fontWeight:900,fontSize:16,marginBottom:22}}>Mode magasin clean</div>
+        <div style={{fontWeight:900,fontSize:28,marginBottom:6}}>Version 12.4.2</div>
+        <div style={{color:theme.accent,fontWeight:900,fontSize:16,marginBottom:22}}>Import URL proxy</div>
         <div style={{height:1,background:theme.border,margin:"0 0 20px"}} />
         <div style={{textAlign:"left"}}>
           <div style={{fontWeight:900,fontSize:17,marginBottom:12}}>Nouveautés</div>
@@ -2935,7 +2930,7 @@ function WhatsNewModal({ theme, onClose }) {
 
 
 export default function App() {
- const [themeName,setThemeName]=useState("light"); const [showWhatsNew,setShowWhatsNew]=useState(()=>localStorage.getItem("menuFamille_v12_4_1_seen")!=="yes"); const theme=themeName==="light"?themeLight:themeDark; const [tab,setTab]=useState("menus"); const [recipes,setRecipes]=useState(INITIAL_RECIPES);
+ const [themeName,setThemeName]=useState("light"); const [showWhatsNew,setShowWhatsNew]=useState(()=>localStorage.getItem("menuFamille_v12_4_2_seen")!=="yes"); const theme=themeName==="light"?themeLight:themeDark; const [tab,setTab]=useState("menus"); const [recipes,setRecipes]=useState(INITIAL_RECIPES);
  useEffect(() => {
    setWeek(prev => prev.map(day => ({
      ...day,
@@ -2958,21 +2953,10 @@ export default function App() {
  const handleDrop=(i,slot)=>e=>{e.preventDefault(); if(!dragState)return; const from=dragState,to={dayIndex:i,slot}; setWeek(prev=>{const next=clone(prev), source=clone(next[from.dayIndex][from.slot]), target=clone(next[to.dayIndex][to.slot]); if(!target.recipeId){next[to.dayIndex][to.slot]={...source,locked:next[to.dayIndex][to.slot].locked}; next[from.dayIndex][from.slot]=emptyMeal()} else {next[to.dayIndex][to.slot]={...source,locked:next[to.dayIndex][to.slot].locked}; next[from.dayIndex][from.slot]={...target,locked:next[from.dayIndex][from.slot].locked}} return next}); setToast("Repas déplacé"); pushHistory("Repas déplacé par glisser-déposer"); setDragState(null); setDropTarget(null)};
  const navItems=[["menus","Menus"],["courses","Courses"],["recipes","Recettes"],["family","Famille"],["settings","Paramètres"]]; const displayItems=[...filteredWeek,{type:"stats"}];
  return <div style={{minHeight:"100vh",background:theme.bg,color:theme.text,fontFamily:"Arial, sans-serif"}} onDragEnd={()=>
- <div style={{
-   position:"fixed",
-   right:12,
-   bottom:12,
-   zIndex:9999,
-   background:"#16a34a",
-   color:"#fff",
-   padding:"10px 14px",
-   borderRadius:999,
-   fontWeight:900,
-   boxShadow:"0 8px 24px rgba(0,0,0,.25)"
- }}>
-   MARQUEUR BUILD v12.4.1
- </div>{setDragState(null);setDropTarget(null)}}>
- {showWhatsNew && <WhatsNewModal theme={theme} onClose={() => { localStorage.setItem("menuFamille_v12_4_1_seen","yes"); setShowWhatsNew(false); }} />}
+ <div style={{position:"fixed",right:12,bottom:12,zIndex:9999,background:"#16a34a",color:"#fff",padding:"10px 14px",borderRadius:999,fontWeight:900,boxShadow:"0 8px 24px rgba(0,0,0,.25)"}}>
+   MARQUEUR BUILD v12.4.2
+ </div>
+ {showWhatsNew && <WhatsNewModal theme={theme} onClose={() => { localStorage.setItem("menuFamille_v12_4_2_seen","yes"); setShowWhatsNew(false); }} />}
  <style>{`@keyframes modalPop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}} @keyframes cardEnter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}} @keyframes pulseStar{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}} .modal-pop{animation:modalPop .18s ease} .card-enter{animation:cardEnter .22s ease} .premium-hover:hover{transform:translateY(-2px)} .micro-btn{transition:transform .12s ease,opacity .12s ease} .micro-btn:hover{transform:translateY(-1px) scale(1.02);opacity:.96} .micro-btn:active{transform:scale(.96)} .pulse-star{animation:pulseStar 1.8s ease-in-out infinite}`}</style>
  <div style={{background:theme.panel,borderBottom:`1px solid ${theme.border}`}}><div style={{maxWidth:1480,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center"}}><div style={{display:"flex",alignItems:"center",gap:18}}><div style={{padding:"14px 10px 14px 24px",fontWeight:900,fontSize:20,display:"flex",alignItems:"center",gap:10}}><span style={{color:theme.accent}}>🍴</span><span>Menu Famille</span></div><div style={{display:"flex",alignItems:"center"}}>{navItems.map(([key,label])=><button className="micro-btn" key={key} onClick={()=>setTab(key)} style={{background:"transparent",border:"none",color:tab===key?theme.accent:theme.text,fontWeight:800,padding:"18px 14px",borderBottom:tab===key?`3px solid ${theme.accent}`:"3px solid transparent",cursor:"pointer"}}>{label}</button>)}</div></div><div style={{paddingRight:24}}><button className="micro-btn" onClick={()=>setThemeName(themeName==="light"?"dark":"light")} style={{border:`1px solid ${theme.accent}`,borderRadius:16,padding:"10px 16px",background:theme.surface,color:theme.accent,fontWeight:800,cursor:"pointer"}}>{themeName==="light"?"☾ Mode sombre":"☀ Mode clair"}</button></div></div></div>
  {showSuggest&&<SuggestMealModal theme={theme} recipes={recipes} week={week} onClose={()=>setShowSuggest(false)} onPick={pickSuggestedRecipe} />}
@@ -2982,7 +2966,7 @@ export default function App() {
  {recipeEditId&&<RecipeFormModal mode="edit" recipe={recipeBeingEdited} theme={theme} onClose={()=>setRecipeEditId(null)} onSave={saveRecipe} />}
  {creatingRecipe&&<RecipeFormModal mode="create" recipe={null} theme={theme} onClose={()=>setCreatingRecipe(false)} onSave={saveRecipe} />}{draftRecipe&&<RecipeFormModal mode="create" recipe={draftRecipe} theme={theme} onClose={()=>setDraftRecipe(null)} onSave={saveRecipe} />}{importingRecipe&&<ImportRecipeModal theme={theme} onClose={()=>setImportingRecipe(false)} onCreate={(recipe)=>{saveRecipe(recipe,"create"); setImportingRecipe(false)}} onEditBeforeCreate={(recipe)=>{setDraftRecipe(recipe); setImportingRecipe(false)}} />}
  <div style={{maxWidth:1480,margin:"0 auto",padding:"24px 20px 30px"}}>
- {tab==="menus"?<><div className="card-enter" style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap",marginBottom:14}}><div><h1 style={{margin:"0 0 6px 0",fontSize:24}}>Menus de la semaine</h1><div style={{color:theme.muted,fontSize:13}}>v12.4.1 : mode magasin clean.</div></div><div style={{display:"flex",gap:12,flexWrap:"wrap"}}><button className="micro-btn" onClick={()=>setTab("courses")} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>🛒 Voir les courses</button><button className="micro-btn" onClick={()=>setShowSuggest(true)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:900,cursor:"pointer"}}>💡 Suggérer un repas</button><button className="micro-btn" onClick={generateSmartWeek} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>⚡ Générer semaine</button><select value={visualFilter} onChange={e=>setVisualFilter(e.target.value)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800}}><option value="all">Filtre : tous</option><option value="favorites">Favoris</option><option value="locked">Verrouillés</option><option value="empty">Repas vides</option><option value="light">Légers</option><option value="balanced">Équilibrés</option><option value="single">Plats uniques</option></select><button className="micro-btn" onClick={()=>setShowHistory(v=>!v)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800,cursor:"pointer"}}>{showHistory?"Masquer l’historique":"Voir l’historique"}</button></div></div>
+ {tab==="menus"?<><div className="card-enter" style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap",marginBottom:14}}><div><h1 style={{margin:"0 0 6px 0",fontSize:24}}>Menus de la semaine</h1><div style={{color:theme.muted,fontSize:13}}>v12.4.2 : build fix + mode magasin.</div></div><div style={{display:"flex",gap:12,flexWrap:"wrap"}}><button className="micro-btn" onClick={()=>setTab("courses")} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>🛒 Voir les courses</button><button className="micro-btn" onClick={()=>setShowSuggest(true)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:900,cursor:"pointer"}}>💡 Suggérer un repas</button><button className="micro-btn" onClick={generateSmartWeek} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>⚡ Générer semaine</button><select value={visualFilter} onChange={e=>setVisualFilter(e.target.value)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800}}><option value="all">Filtre : tous</option><option value="favorites">Favoris</option><option value="locked">Verrouillés</option><option value="empty">Repas vides</option><option value="light">Légers</option><option value="balanced">Équilibrés</option><option value="single">Plats uniques</option></select><button className="micro-btn" onClick={()=>setShowHistory(v=>!v)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800,cursor:"pointer"}}>{showHistory?"Masquer l’historique":"Voir l’historique"}</button></div></div>
  {showHistory&&<div className="card-enter" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:16,boxShadow:theme.shadow,marginBottom:14}}><div style={{fontWeight:900,marginBottom:10}}>Historique rapide</div>{history.length===0?<div style={{color:theme.muted,fontSize:13}}>Aucune action enregistrée.</div>:history.map((h,i)=><div key={i} style={{padding:"10px 12px",borderRadius:12,background:theme.surface,border:`1px solid ${theme.border}`,marginBottom:8}}><div style={{fontWeight:700,fontSize:13}}>{h.label}</div><div style={{fontSize:11,color:theme.muted,marginTop:2}}>{h.at}</div></div>)}</div>}
  <div style={{display:"grid",gap:12,gridTemplateColumns:"repeat(4,minmax(180px,1fr))",alignItems:"start"}}>{displayItems.map(item=>{if(item.type==="stats")return <StatsCard key="stats" week={week} theme={theme}/>; const i=week.findIndex(w=>w.day===item.day); return <div key={item.day} className="card-enter" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:12,boxShadow:theme.shadow}}><div style={{textAlign:"center",fontWeight:900,fontSize:15,marginBottom:10}}>{item.day}</div><div style={{display:"grid",gap:10}}>{item.showLunch&&<MealCard label="Midi" meal={item.lunch} theme={theme} onQuick={()=>setRecipeSheetId(item.lunch.recipeId)} onEdit={()=>item.lunch.recipeId&&setRecipeEditId(item.lunch.recipeId)} onLock={()=>toggleLock(i,"lunch")} onDragStart={handleDragStart(i,"lunch")} onDragOver={handleDragOver(i,"lunch")} onDrop={handleDrop(i,"lunch")} isDropTarget={dropTarget?.dayIndex===i&&dropTarget?.slot==="lunch"} isDraggingSource={dragState?.dayIndex===i&&dragState?.slot==="lunch"}/>}{item.showDinner&&<MealCard label="Soir" meal={item.dinner} theme={theme} onQuick={()=>setRecipeSheetId(item.dinner.recipeId)} onEdit={()=>item.dinner.recipeId&&setRecipeEditId(item.dinner.recipeId)} onLock={()=>toggleLock(i,"dinner")} onDragStart={handleDragStart(i,"dinner")} onDragOver={handleDragOver(i,"dinner")} onDrop={handleDrop(i,"dinner")} isDropTarget={dropTarget?.dayIndex===i&&dropTarget?.slot==="dinner"} isDraggingSource={dragState?.dayIndex===i&&dragState?.slot==="dinner"}/>}</div></div>})}</div></>:tab==="recipes"?<RecipesTab recipes={recipes} theme={theme} onSelectRecipe={setRecipeSheetId} onEditRecipe={setRecipeEditId} onCreateRecipe={()=>setCreatingRecipe(true)} onImportRecipe={()=>setImportingRecipe(true)} onToggleFavorite={toggleRecipeFavorite}/>:tab==="courses"?<CoursesTab week={week} recipes={recipes} theme={theme}/>:<div className="card-enter" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:22,padding:24,boxShadow:theme.shadow}}><div style={{fontWeight:900,fontSize:24,marginBottom:8}}>{navItems.find(([k])=>k===tab)?.[1]}</div><div style={{color:theme.muted}}>Onglet disponible. Base stable conservée.</div></div>}
  </div></div>
