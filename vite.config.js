@@ -1,16 +1,6 @@
-Version corrigée pour GitHub + Netlify.
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-Contenu important à envoyer sur GitHub :
-- package.json
-- index.html
-- vite.config.js
-- src/App.jsx
-- src/main.jsx
-- netlify.toml
-- netlify/functions/fetch-recipe.js
-- public/_redirects
-
-Netlify :
-Build command = npm run build
-Publish directory = dist
-Functions directory = netlify/functions
+export default defineConfig({
+  plugins: [react()],
+})

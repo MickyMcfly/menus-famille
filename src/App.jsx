@@ -1,6 +1,34 @@
 
 import React, { useMemo, useState, useEffect } from "react";
 
+
+const LUNCH_BUREAU_TAGS = ["Lunch Bureau", "Express", "Placard", "Micro-ondes OK", "Équilibré", "Protéiné"];
+const isLunchBureauRecipe = (recipe) => (recipe.tags || []).some(tag => LUNCH_BUREAU_TAGS.includes(tag));
+const lunchTagStyle = (tag, theme) => {
+  const styles = {
+    "Lunch Bureau": ["#dbeafe", "#1d4ed8"],
+    "Express": ["#fef3c7", "#b45309"],
+    "Placard": ["#ede9fe", "#6d28d9"],
+    "Micro-ondes OK": ["#fee2e2", "#b91c1c"],
+    "Équilibré": ["#dcfce7", "#15803d"],
+    "Protéiné": ["#e0f2fe", "#0369a1"]
+  };
+  const [background, color] = styles[tag] || [theme.surface, theme.muted];
+  return { background, color };
+};
+
+
+
+const APP_VERSION = "14.1.1";
+const APP_SUBTITLE = "Tags Lunch Bureau corrigés";
+const APP_WHATS_NEW = [
+  "Correction de l’erreur de démarrage de la v14.1.",
+  "Ajout des tags Lunch Bureau.",
+  "Bouton filtre Lunch Bureau dans les recettes.",
+  "Tags visuels : Express, Placard, Micro-ondes OK, Équilibré, Protéiné."
+];
+
+
 const INITIAL_RECIPES = [
   {
     "id": "r1",
@@ -74,7 +102,10 @@ const INITIAL_RECIPES = [
     "tags": [
       "rapide",
       "froid"
-    ],
+    ,
+      "Lunch Bureau",
+      "Express",
+      "Équilibré"],
     "device": "aucun",
     "summary": {
       "protein": "Œufs",
@@ -152,7 +183,10 @@ const INITIAL_RECIPES = [
     "tags": [
       "froid",
       "batch cooking"
-    ],
+    ,
+      "Lunch Bureau",
+      "Express",
+      "Équilibré"],
     "device": "aucun",
     "summary": {
       "protein": "",
@@ -281,7 +315,10 @@ const INITIAL_RECIPES = [
     "tags": [
       "healthy",
       "batch cooking"
-    ],
+    ,
+      "Lunch Bureau",
+      "Express",
+      "Équilibré"],
     "device": "poêle",
     "summary": {
       "protein": "Poulet",
@@ -386,7 +423,12 @@ const INITIAL_RECIPES = [
     "tags": [
       "rapide",
       "froid"
-    ],
+    ,
+      "Lunch Bureau",
+      "Express",
+      "Équilibré",
+      "Placard",
+      "Protéiné"],
     "device": "aucun",
     "summary": {
       "protein": "Thon",
@@ -438,7 +480,10 @@ const INITIAL_RECIPES = [
     "tags": [
       "air fryer",
       "healthy"
-    ],
+    ,
+      "Lunch Bureau",
+      "Placard",
+      "Protéiné"],
     "device": "air fryer",
     "summary": {
       "protein": "Poulet",
@@ -516,7 +561,10 @@ const INITIAL_RECIPES = [
     "tags": [
       "froid",
       "healthy"
-    ],
+    ,
+      "Lunch Bureau",
+      "Placard",
+      "Protéiné"],
     "device": "aucun",
     "summary": {
       "protein": "Sardines",
@@ -1208,7 +1256,10 @@ const INITIAL_RECIPES = [
     "tags": [
       "froid",
       "rapide"
-    ],
+    ,
+      "Lunch Bureau",
+      "Placard",
+      "Protéiné"],
     "device": "aucun",
     "summary": {
       "protein": "Saumon",
@@ -1424,9 +1475,13 @@ const getWeekShoppingList = (week, recipeMap) => {
 
 const getShoppingCategory = (name) => {
   const n = normalizeKey(name);
+  try {
+    const learned = JSON.parse(localStorage.getItem("menuFamilleLearnedCategories") || "{}");
+    if (learned[n]) return learned[n];
+  } catch (e) {}
   const rules = [
     ["🥦 Fruits & légumes", ["tomate","courgette","carotte","concombre","salade","brocoli","poivron","aubergine","oignon","champignon","epinard","haricot vert","roquette","mais","ratatouille","banane","bananes","fruit","fruits"]],
-    ["🥩 Viandes & poissons", ["poulet","boeuf","bœuf","dinde","jambon","thon","saumon","sardine","poisson","crevette","merguez","saucisse","steak","chorizo"]],
+    ["🥩 Viandes & poissons", ["poulet","boeuf","bœuf","porc","cote de porc","cotes de porc","côte de porc","côtes de porc","dinde","jambon","thon","saumon","sardine","poisson","crevette","merguez","saucisse","steak","chorizo","lardon","lardons","bacon","veau","agneau","canard"]],
     ["🥛 Frais & fromages", ["oeuf","œuf","creme","crème","fromage","feta","mozzarella","chevre","chèvre","emmental","parmesan","boursin","lait","yaourt"]],
     ["🍝 Féculents", ["pate","pâtes","riz","semoule","quinoa","orzo","gnocchi","pain","tortilla","galette","pomme de terre","puree","purée","macaroni"]],
     ["🥫 Épicerie", ["pesto","curry","bouillon","moutarde","chapelure","sauce soja","haricot rouge","lentille","pois chiche","huile","jus","jus d orange","jus d’orange"]],
@@ -1997,7 +2052,7 @@ function SuggestMealModal({ theme, recipes, week, onClose, onPick }) {
           <div style={{height:58,borderRadius:14,background:theme.surface2,border:`1px solid ${theme.border}`,display:"flex",alignItems:"center",justifyContent:"center",color:theme.muted,fontSize:11}}>photo</div>
           <div style={{fontWeight:900,fontSize:15,marginTop:10,lineHeight:1.25}}>{recipe.name} {recipe.favorite ? "⭐" : ""}</div>
           <div style={{color:theme.muted,fontSize:12,marginTop:5}}>{typeLabel(recipe.mealType)} • {recipe.device || "—"}</div>
-          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:10,minHeight:24}}>{(recipe.tags || []).slice(0,2).map(t=><span key={t} style={{fontSize:11,padding:"4px 8px",borderRadius:999,border:`1px solid ${theme.border}`,color:theme.muted}}>#{t}</span>)}</div>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:10,minHeight:24}}>{(recipe.tags || []).slice(0,2).map(t=><span key={t} style={{fontSize:11,padding:"4px 8px",borderRadius:999,border:`1px solid ${LUNCH_BUREAU_TAGS.includes(t)?lunchTagStyle(t,theme).color:theme.border}`,background:LUNCH_BUREAU_TAGS.includes(t)?lunchTagStyle(t,theme).background:"transparent",color:LUNCH_BUREAU_TAGS.includes(t)?lunchTagStyle(t,theme).color:theme.muted,fontWeight:LUNCH_BUREAU_TAGS.includes(t)?900:700}}>#{t}</span>)}</div>
           <button className="micro-btn" onClick={()=>onPick(recipe, day, slot)} style={{marginTop:12,width:"100%",padding:"10px 12px",borderRadius:12,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:900,cursor:"pointer"}}>Choisir</button>
         </div>)}
       </div>
@@ -2074,16 +2129,74 @@ function RecipeSheet({ recipe, theme, onClose, onEdit, onToggleFavorite, onAddTo
   </div>
 }
 
-function MealCard({ label, meal, theme, onQuick, onEdit, onLock, onDragStart, onDragOver, onDrop, isDropTarget, isDraggingSource }) {
- return <div className="card-enter"><div style={{fontWeight:800,marginBottom:6,fontSize:12,paddingLeft:2}}>{label}</div><div className="premium-hover" draggable onDragStart={onDragStart} onDragOver={onDragOver} onDrop={onDrop} style={{background:isDropTarget?theme.accentSoft:theme.surface,border:`1px solid ${isDropTarget?theme.accent:(meal.locked?theme.accent:theme.border)}`,borderRadius:18,padding:10,transform:isDraggingSource?"scale(1.02)":(isDropTarget?"scale(1.012)":"scale(1)"),opacity:isDraggingSource?.52:1,transition:"all .14s ease"}}>
+
+
+function getLunchAlternativeLabel(meal) {
+  if (!meal?.recipeName) return "Alternative restes : à définir";
+
+  const name = String(meal.recipeName).toLowerCase();
+
+  if (name.includes("chili")) return "Alternative restes : chili si dispo";
+  if (name.includes("quiche")) return "Alternative restes : quiche froide + salade";
+  if (name.includes("soupe")) return "Alternative restes : soupe réchauffée";
+  if (name.includes("poulet")) return "Alternative restes : poulet froid ou réchauffé";
+  if (name.includes("pâtes") || name.includes("pates")) return "Alternative restes : pâtes de la veille";
+  if (name.includes("riz")) return "Alternative restes : riz/légumes de la veille";
+
+  return "Alternative restes : si disponibles";
+}
+
+function PortionInlineBadge({ dayName, slotKey, presence, familyMembers, theme }) {
+  if (!dayName || !slotKey || !presence || !familyMembers) return null;
+  const slot = getSlotFromDayAndMeal(dayName, slotKey);
+  const count = getPortionCountForSlot(presence, familyMembers, slot);
+  const members = getPresentMembersForSlot(presence, familyMembers, slot);
+
+  return (
+    <span title={members.length ? members.join(", ") : "Personne"} style={{
+      display:"inline-flex",
+      alignItems:"center",
+      gap:4,
+      padding:"3px 8px",
+      borderRadius:999,
+      background:theme.accentSoft,
+      color:theme.accent,
+      fontSize:11,
+      fontWeight:950,
+      marginLeft:8,
+      whiteSpace:"nowrap"
+    }}>
+      👥 {count} p.
+    </span>
+  );
+}
+
+function MealCard({ label, meal, theme, onQuick, onEdit, onLock, onDragStart, onDragOver, onDrop, isDropTarget, isDraggingSource, dayName, slotKey, presence, familyMembers }) {
+ return <div className="card-enter"><div style={{fontWeight:800,marginBottom:6,fontSize:12,paddingLeft:2,display:"flex",alignItems:"center",gap:6}}>{label}<PortionInlineBadge dayName={dayName} slotKey={slotKey} presence={presence} familyMembers={familyMembers} theme={theme}/></div><div className="premium-hover" draggable onDragStart={onDragStart} onDragOver={onDragOver} onDrop={onDrop} style={{background:isDropTarget?theme.accentSoft:theme.surface,border:`1px solid ${isDropTarget?theme.accent:(meal.locked?theme.accent:theme.border)}`,borderRadius:18,padding:10,transform:isDraggingSource?"scale(1.02)":(isDropTarget?"scale(1.012)":"scale(1)"),opacity:isDraggingSource?.52:1,transition:"all .14s ease"}}>
   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}><span style={{fontSize:10,color:theme.muted,fontWeight:700}}>{meal.locked?"Verrouillé":"Repas"}</span><div style={{display:"flex",gap:6}}><button className="micro-btn" onClick={onQuick} style={{width:26,height:26,borderRadius:9,border:`1px solid ${theme.border}`,background:theme.panel,color:theme.text,cursor:"pointer"}}>👁</button><button className="micro-btn" onClick={onEdit} style={{width:26,height:26,borderRadius:9,border:`1px solid ${theme.border}`,background:theme.panel,color:theme.text,cursor:"pointer"}}>✎</button><button className="micro-btn" onClick={onLock} style={{width:26,height:26,borderRadius:9,border:`1px solid ${theme.border}`,background:theme.panel,color:theme.text,cursor:"pointer"}}>{meal.locked?"🔒":"🔓"}</button></div></div>
-  <div style={{height:52,borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface2,display:"flex",alignItems:"center",justifyContent:"center",color:theme.muted,fontSize:10,overflow:"hidden"}}>{meal.recipeId?(meal.photoUrl?<img src={meal.photoUrl} alt={meal.recipeName} onError={e=>{e.currentTarget.style.display="none"}} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:"photo"):"Déposer ici"}</div><div style={{display:"grid",gap:6,marginTop:10}}><div style={{minHeight:40,display:"flex",alignItems:"center",justifyContent:"center",textAlign:"center",fontWeight:900,fontSize:13,lineHeight:1.25}}>{meal.recipeName}</div><div style={{display:"flex",justifyContent:"center",minHeight:18}}>{meal.favorite?<span className="pulse-star">⭐</span>:null}</div><div style={{textAlign:"center",color:theme.muted,fontSize:11,lineHeight:1.3,minHeight:28}}>{mealSummary(meal)}</div></div></div></div>
+  <div style={{height:52,borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface2,display:"flex",alignItems:"center",justifyContent:"center",color:theme.muted,fontSize:10,overflow:"hidden"}}>{meal.recipeId?(meal.photoUrl?<img src={meal.photoUrl} alt={meal.recipeName} onError={e=>{e.currentTarget.style.display="none"}} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:"photo"):"Déposer ici"}</div><div style={{display:"grid",gap:6,marginTop:10}}><div style={{minHeight:40,display:"flex",alignItems:"center",justifyContent:"center",textAlign:"center",fontWeight:900,fontSize:13,lineHeight:1.25}}>{meal.recipeName}</div><div style={{display:"flex",justifyContent:"center",minHeight:18}}>{meal.favorite?<span className="pulse-star">⭐</span>:null}</div><div style={{textAlign:"center",color:theme.muted,fontSize:11,lineHeight:1.3,minHeight:28}}>{mealSummary(meal)}</div>
+  {slotKey === "lunch" && meal?.recipeName ? (
+    <div style={{
+      marginTop: 8,
+      padding: "6px 8px",
+      borderRadius: 10,
+      background: theme.surface2,
+      color: theme.muted,
+      border: `1px dashed ${theme.border}`,
+      fontSize: 11,
+      fontWeight: 800,
+      textAlign: "center"
+    }}>
+      {getLunchAlternativeLabel(meal)}
+    </div>
+  ) : null}
+  </div></div></div>
 }
 
 function StatsCard({week,theme}) {
  const meals=week.flatMap(d=>[d.lunch,d.dinner]); const total=meals.filter(m=>m.recipeId).length; const favorites=meals.filter(m=>m.favorite).length; const locked=meals.filter(m=>m.locked).length; const empty=meals.filter(m=>!m.recipeId).length; const light=meals.filter(m=>m.mealType==="light").length; const balanced=meals.filter(m=>m.mealType==="balanced").length; const single=meals.filter(m=>m.mealType==="single").length;
  const row=(a,b)=><div style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"6px 0"}}><span>{a}</span><b>{b}</b></div>;
- return <div className="card-enter" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:12,boxShadow:theme.shadow}}><div style={{textAlign:"center",fontWeight:900,fontSize:15,marginBottom:10}}>📊 Stats</div><div className="premium-hover" style={{background:theme.surface,border:`1px solid ${theme.border}`,borderRadius:18,padding:12}}><div style={{textAlign:"center",paddingBottom:8,borderBottom:`1px solid ${theme.border}`}}><div style={{fontSize:28,fontWeight:900}}>{total}</div><div style={{fontSize:11,color:theme.muted}}>repas planifiés</div></div>{row("⭐ Favoris",favorites)}{row("🥗 Légers",light)}{row("🍽 Équilibrés",balanced)}{row("🍕 Plats uniques",single)}{row("🔒 Verrouillés",locked)}{row("🕳 Vides",empty)}</div></div>
+ return <div className="card-enter" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:22,padding:14,boxShadow:theme.shadow}}><div style={{textAlign:"center",fontWeight:900,fontSize:15,marginBottom:10}}>📊 Stats</div><div className="premium-hover" style={{background:theme.surface,border:`1px solid ${theme.border}`,borderRadius:18,padding:12}}><div style={{textAlign:"center",paddingBottom:8,borderBottom:`1px solid ${theme.border}`}}><div style={{fontSize:28,fontWeight:900}}>{total}</div><div style={{fontSize:11,color:theme.muted}}>repas planifiés</div></div>{row("⭐ Favoris",favorites)}{row("🥗 Légers",light)}{row("🍽 Équilibrés",balanced)}{row("🍕 Plats uniques",single)}{row("🔒 Verrouillés",locked)}{row("🕳 Vides",empty)}</div></div>
 }
 
 
@@ -2232,7 +2345,7 @@ function getShoppingShortLabel(item) {
 
 
 
-function ProductConfigModal({ item, theme, onClose, onIncrement, onDecrement, onRemove }) {
+function ProductConfigModal({ item, theme, onClose, onIncrement, onDecrement, onRemove, onChangeCategory }) {
   if (!item) return null;
 
   const category = item.category || getShoppingCategory(item.name);
@@ -2404,9 +2517,18 @@ function ProductConfigModal({ item, theme, onClose, onIncrement, onDecrement, on
         }}>
           <div style={{fontWeight:950,fontSize:16}}>Détails</div>
           <div style={{display:"grid",gap:8}}>
-            <div style={{display:"flex",justifyContent:"space-between",gap:10,fontSize:14}}>
-              <span style={{color:theme.muted}}>Rayon</span>
-              <b>{category}</b>
+            <div style={{display:"grid",gap:8}}>
+              <span style={{color:theme.muted,fontSize:13,fontWeight:850}}>Rayon</span>
+              <select value={category} onChange={(e)=>onChangeCategory(item,e.target.value)} style={{
+                padding:"11px 12px",
+                borderRadius:14,
+                border:`1px solid ${theme.border}`,
+                background:theme.panel,
+                color:theme.text,
+                fontWeight:900
+              }}>
+                {shoppingCategoryOrder.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
             </div>
             <div style={{display:"flex",justifyContent:"space-between",gap:10,fontSize:14}}>
               <span style={{color:theme.muted}}>Source</span>
@@ -2447,6 +2569,7 @@ function ProductConfigModal({ item, theme, onClose, onIncrement, onDecrement, on
 
 function CoursesTab({ week, recipes, theme }) {
   const [quickMode, setQuickMode] = useState(false);
+  const [storeMobileMode, setStoreMobileMode] = useState(false);
   const [manualInput, setManualInput] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [categoryOrder, setCategoryOrder] = useState(() => {
@@ -2472,6 +2595,7 @@ function CoursesTab({ week, recipes, theme }) {
     try { return JSON.parse(localStorage.getItem("menuFamille_quantity_overrides") || "{}"); }
     catch { return {}; }
   });
+  const [categoryLearningTick, setCategoryLearningTick] = useState(0);
 
   const recipeMap = useMemo(() => Object.fromEntries(recipes.map(r => [r.id, r])), [recipes]);
   const autoShoppingList = useMemo(() => getWeekShoppingList(week, recipeMap), [week, recipeMap]);
@@ -2636,7 +2760,14 @@ function CoursesTab({ week, recipes, theme }) {
       const bi = categoryOrder.indexOf(b.category);
       return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
     });
-  }, [activeShoppingList, categoryOrder]);
+  }, [activeShoppingList, categoryOrder, categoryLearningTick]);
+
+
+  const changeProductCategory = (item, category) => {
+    saveLearnedCategory(item.name, category);
+    setSelectedProduct(prev => prev ? { ...prev, category } : prev);
+    setCategoryLearningTick(v => v + 1);
+  };
 
   const markBought = (item, category) => {
     const key = getItemKey(item, category);
@@ -2769,13 +2900,13 @@ function CoursesTab({ week, recipes, theme }) {
             const next = (prev.count || prev.qty || 1) - 1;
             return next <= 0 ? null : {...prev, count:next, qty:0};
           }); }}
-          onRemove={removeShoppingItem}
+          onRemove={removeShoppingItem} onChangeCategory={changeProductCategory}
         />
       )}
       <div style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap",marginBottom:14}}>
         <div>
           <h1 style={{margin:"0 0 6px 0",fontSize:24}}>Liste de courses · Responsive optimisé</h1>
-          <div style={{color:theme.muted,fontSize:13}}>v12.5 : optimisation responsive totale.</div>
+          <div style={{color:theme.muted,fontSize:13}}>v14.1.1.1 : portions visibles dans menus.</div>
         </div>
         <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
           <div style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:16,padding:"12px 16px",boxShadow:theme.shadow}}>
@@ -2784,7 +2915,7 @@ function CoursesTab({ week, recipes, theme }) {
           <button className="micro-btn" onClick={() => setQuickMode(v => !v)} style={{
             padding:"12px 16px",borderRadius:14,border:`1px solid ${quickMode ? theme.accent : theme.border}`,
             background:quickMode ? theme.accentSoft : theme.surface,color:quickMode ? theme.accent : theme.text,fontWeight:900,cursor:"pointer"
-          }}>{quickMode ? "Vue détaillée" : "Mode rapide"}</button>
+          }}>{quickMode ? "Vue détaillée" : "Mode rapide"}</button><button className="micro-btn" onClick={() => setStoreMobileMode(true)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accentSoft,color:theme.accent,fontWeight:900,cursor:"pointer"}}>🛒 Mode magasin mobile</button>
           <button className="micro-btn" onClick={clearBought} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>
             Vider achetés
           </button>
@@ -2885,29 +3016,330 @@ function CoursesTab({ week, recipes, theme }) {
   );
 }
 
-function RecipesTab({recipes,theme,onSelectRecipe,onEditRecipe,onCreateRecipe,onImportRecipe,onToggleFavorite}) {
- const [search,setSearch]=useState(""); const [typeFilter,setTypeFilter]=useState("all"); const [favOnly,setFavOnly]=useState(false);
- const filtered=recipes.filter(r=>{const recipeSearchText = normalizeIngredients(r.ingredients||[]).map(ingredientText).join(" "); const txt=`${r.name} ${recipeSearchText} ${(r.tags||[]).join(" ")}`.toLowerCase(); return (!search.trim()||txt.includes(search.toLowerCase()))&&(typeFilter==="all"||r.mealType===typeFilter)&&(!favOnly||r.favorite)});
- return <div className="card-enter"><div style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap",marginBottom:14}}><div><h1 style={{margin:"0 0 6px 0",fontSize:24}}>Carnet de recettes</h1><div style={{color:theme.muted,fontSize:13}}>v12.5 : optimisation responsive totale.</div></div><div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button className="micro-btn" onClick={onCreateRecipe} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:900,cursor:"pointer"}}>+ Nouvelle recette / importer</button><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher..." style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,minWidth:240}} /><select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800}}><option value="all">Tous types</option><option value="light">Léger</option><option value="balanced">Équilibré</option><option value="single">Plat unique</option></select><button className="micro-btn" onClick={()=>setFavOnly(v=>!v)} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${favOnly?theme.accent:theme.border}`,background:favOnly?theme.accentSoft:theme.surface,color:favOnly?theme.accent:theme.text,fontWeight:800,cursor:"pointer"}}>⭐ Favoris</button></div></div>
- <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:12}}>{filtered.map(r=><div key={r.id} className="card-enter premium-hover" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:14,boxShadow:theme.shadow,transition:"transform .14s ease"}}><div style={{height:78,borderRadius:16,background:theme.surface2,border:`1px solid ${theme.border}`,display:"flex",alignItems:"center",justifyContent:"center",color:theme.muted,fontSize:12,overflow:"hidden"}}>{getRecipePhoto(r)?<img src={getRecipePhoto(r)} alt={r.name} onError={e=>{e.currentTarget.style.display="none"}} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:"photo recette"}</div><div style={{display:"flex",justifyContent:"space-between",gap:10,alignItems:"start",marginTop:12}}><div><div style={{fontWeight:900,fontSize:16}}>{r.name}</div><div style={{color:theme.muted,fontSize:12,marginTop:5}}>{typeLabel(r.mealType)} • {r.device||"—"}</div></div><button className="micro-btn" onClick={()=>onToggleFavorite(r.id)} style={{border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,borderRadius:12,width:34,height:34,cursor:"pointer"}}>{r.favorite?"⭐":"☆"}</button></div><div style={{color:theme.muted,fontSize:12,marginTop:10,minHeight:32}}>{normalizeIngredients(r.ingredients||[]).slice(0,4).map(ingredientText).join(", ")}</div><div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:10}}>{(r.tags||[]).slice(0,3).map(t=><span key={t} style={{fontSize:11,padding:"4px 8px",borderRadius:999,border:`1px solid ${theme.border}`,color:theme.muted}}>#{t}</span>)}</div><div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:12}}><button className="micro-btn" onClick={()=>onSelectRecipe(r.id)} style={{padding:"9px 12px",borderRadius:12,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800,cursor:"pointer"}}>Voir</button><button className="micro-btn" onClick={()=>onEditRecipe(r.id)} style={{padding:"9px 12px",borderRadius:12,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:800,cursor:"pointer"}}>Modifier</button></div></div>)}</div>{filtered.length===0&&<div style={{marginTop:16,background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:18,color:theme.muted}}>Aucune recette.</div>}</div>
+
+
+
+function MenusPremiumPanel({week,theme,onGenerate,onSuggest,onShowShopping}) {
+ const meals = week.flatMap(day => [day.lunch, day.dinner]).filter(Boolean);
+ const planned = meals.filter(meal => meal?.recipeName || meal?.recipeId);
+ const locked = meals.filter(meal => meal?.locked).length;
+ const favorites = planned.filter(meal => meal?.favorite).length;
+ const empty = Math.max(0, 14 - planned.length);
+ const lunchFilled = week.filter(day => day.lunch?.recipeName || day.lunch?.recipeId).length;
+ const dinnerFilled = week.filter(day => day.dinner?.recipeName || day.dinner?.recipeId).length;
+
+ const miniCard = {
+   background: theme.surface,
+   border: `1px solid ${theme.border}`,
+   borderRadius: 18,
+   padding: "14px 16px"
+ };
+
+ return <div className="card-enter" style={{
+   background: theme.panel,
+   border: `1px solid ${theme.border}`,
+   borderRadius: 24,
+   padding: 18,
+   boxShadow: theme.shadow,
+   marginBottom: 16
+ }}>
+   <div style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap",marginBottom:16}}>
+     <div>
+       <div style={{fontSize:12,color:theme.muted,fontWeight:950,textTransform:"uppercase",letterSpacing:".08em"}}>
+         Planning premium
+       </div>
+       <div style={{fontSize:24,fontWeight:950,letterSpacing:"-.04em",marginTop:4}}>
+         Vue d’ensemble de la semaine
+       </div>
+       <div style={{fontSize:13,color:theme.muted,marginTop:4}}>
+         Un résumé rapide avant de modifier les repas.
+       </div>
+     </div>
+
+     <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+       <button className="micro-btn" onClick={onSuggest} style={{padding:"11px 13px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:900,cursor:"pointer"}}>
+         💡 Suggestion
+       </button>
+       <button className="micro-btn" onClick={onGenerate} style={{padding:"11px 13px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>
+         ⚡ Générer
+       </button>
+       <button className="micro-btn" onClick={onShowShopping} style={{padding:"11px 13px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>
+         🛒 Courses
+       </button>
+     </div>
+   </div>
+
+   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12}}>
+     <div style={miniCard}>
+       <div style={{fontSize:24}}>🍽️</div>
+       <div style={{fontSize:22,fontWeight:950,marginTop:4}}>{planned.length}/14</div>
+       <div style={{fontSize:12,color:theme.muted,fontWeight:850}}>repas planifiés</div>
+     </div>
+     <div style={miniCard}>
+       <div style={{fontSize:24}}>🔒</div>
+       <div style={{fontSize:22,fontWeight:950,marginTop:4}}>{locked}</div>
+       <div style={{fontSize:12,color:theme.muted,fontWeight:850}}>verrouillés</div>
+     </div>
+     <div style={miniCard}>
+       <div style={{fontSize:24}}>⭐</div>
+       <div style={{fontSize:22,fontWeight:950,marginTop:4}}>{favorites}</div>
+       <div style={{fontSize:12,color:theme.muted,fontWeight:850}}>favoris</div>
+     </div>
+     <div style={miniCard}>
+       <div style={{fontSize:24}}>⚠️</div>
+       <div style={{fontSize:22,fontWeight:950,marginTop:4}}>{empty}</div>
+       <div style={{fontSize:12,color:theme.muted,fontWeight:850}}>créneaux libres</div>
+     </div>
+   </div>
+
+   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginTop:12}}>
+     <div style={{...miniCard,padding:14}}>
+       <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:theme.muted,fontWeight:850,marginBottom:6}}>
+         <span>Midis remplis</span><span>{lunchFilled}/7</span>
+       </div>
+       <div style={{height:9,borderRadius:999,background:theme.bg,overflow:"hidden"}}>
+         <div style={{height:"100%",width:`${Math.round((lunchFilled/7)*100)}%`,background:theme.accent,borderRadius:999}} />
+       </div>
+     </div>
+     <div style={{...miniCard,padding:14}}>
+       <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:theme.muted,fontWeight:850,marginBottom:6}}>
+         <span>Soirs remplis</span><span>{dinnerFilled}/7</span>
+       </div>
+       <div style={{height:9,borderRadius:999,background:theme.bg,overflow:"hidden"}}>
+         <div style={{height:"100%",width:`${Math.round((dinnerFilled/7)*100)}%`,background:theme.accent,borderRadius:999}} />
+       </div>
+     </div>
+   </div>
+ </div>
 }
 
 
-function WhatsNewModal({ theme, onClose }) {
-  const items = [
-    "Ajout rapide manuel depuis les courses.",
-    "Suggestions en boutons arrondis.",
-    "Import URL proxy personnalisable dans les courses.",
-    "Historique des articles utilisés récemment.",
-    "Import URL proxy avec + / − / supprimer."
-  ];
+
+
+function PresenceSettingsTab({ theme, familyMembers, presence, setPresence }) {
+  const toggle = (member, slot) => {
+    setPresence(prev => ({...prev,[member]:{...prev[member],[slot]:!prev[member]?.[slot]}}));
+  };
+  const setAllForMember = (member, value) => {
+    setPresence(prev => {
+      const copy = {...prev,[member]:{...(prev[member]||{})}};
+      PRESENCE_SLOTS.forEach(slot => copy[member][slot] = value);
+      return copy;
+    });
+  };
+  return <div className="card-enter" style={{display:"grid",gap:18}}>
+    <div style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:24,padding:24,boxShadow:theme.shadow}}>
+      <h1 style={{margin:"0 0 6px 0"}}>Présence hebdomadaire</h1>
+      <div style={{color:theme.muted}}>Une carte par personne, plus lisible que le tableau global.</div>
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))",gap:16}}>
+      {familyMembers.map(member => (
+        <div key={member} style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:24,padding:18,boxShadow:theme.shadow}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:14}}>
+            <div>
+              <div style={{fontSize:12,color:theme.muted,fontWeight:950,textTransform:"uppercase",letterSpacing:".08em"}}>Personne</div>
+              <div style={{fontSize:24,fontWeight:950,letterSpacing:"-.04em",marginTop:2}}>👤 {member}</div>
+            </div>
+            <div style={{display:"flex",gap:8}}>
+              <button className="micro-btn" onClick={()=>setAllForMember(member,true)} style={{border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,borderRadius:12,padding:"8px 10px",fontWeight:900,cursor:"pointer"}}>Tout</button>
+              <button className="micro-btn" onClick={()=>setAllForMember(member,false)} style={{border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,borderRadius:12,padding:"8px 10px",fontWeight:900,cursor:"pointer"}}>Rien</button>
+            </div>
+          </div>
+          <div style={{display:"grid",gap:8}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 76px 76px",gap:8,color:theme.muted,fontSize:12,fontWeight:950,textTransform:"uppercase",letterSpacing:".06em",padding:"0 8px"}}>
+              <div>Jour</div><div style={{textAlign:"center"}}>Midi</div><div style={{textAlign:"center"}}>Soir</div>
+            </div>
+            {PRESENCE_DAYS.map(day => (
+              <div key={day} style={{display:"grid",gridTemplateColumns:"1fr 76px 76px",gap:8,alignItems:"center",background:theme.surface,border:`1px solid ${theme.border}`,borderRadius:16,padding:"10px 8px"}}>
+                <div style={{fontWeight:950}}>{day}</div>
+                {PRESENCE_MOMENTS.map(moment => {
+                  const slot = `${day} ${moment}`;
+                  const checked = !!presence?.[member]?.[slot];
+                  return <button key={slot} className="micro-btn" onClick={()=>toggle(member,slot)} style={{minHeight:42,borderRadius:14,border:`1px solid ${checked ? theme.accent : theme.border}`,background:checked ? theme.accentSoft : theme.panel,color:checked ? theme.accent : theme.muted,fontWeight:950,cursor:"pointer"}}>{checked ? "✓" : "—"}</button>
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>;
+}
+
+function FamilySettingsTab({ theme, familyMembers, setFamilyMembers, setPresence }) {
+  const [name, setName] = useState("");
+  const addMember = () => {
+    const clean = name.trim();
+    if (!clean || familyMembers.some(m => m.toLowerCase() === clean.toLowerCase())) return;
+    const nextMembers = [...familyMembers, clean];
+    setFamilyMembers(nextMembers);
+    setPresence(prev => normalizePresenceForMembers(prev, nextMembers));
+    setName("");
+  };
+  const renameMember = (oldName, newName) => {
+    const clean = newName.trim();
+    if (!clean || clean === oldName || familyMembers.some(m => m !== oldName && m.toLowerCase() === clean.toLowerCase())) return;
+    const nextMembers = familyMembers.map(m => m === oldName ? clean : m);
+    setFamilyMembers(nextMembers);
+    setPresence(prev => {
+      const copy = {...prev};
+      copy[clean] = copy[oldName] || {};
+      delete copy[oldName];
+      return normalizePresenceForMembers(copy, nextMembers);
+    });
+  };
+  const removeMember = (member) => {
+    const nextMembers = familyMembers.filter(m => m !== member);
+    setFamilyMembers(nextMembers);
+    setPresence(prev => {
+      const copy = {...prev};
+      delete copy[member];
+      return normalizePresenceForMembers(copy, nextMembers);
+    });
+  };
+  const moveMember = (member, direction) => {
+    const index = familyMembers.indexOf(member);
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= familyMembers.length) return;
+    const copy = [...familyMembers];
+    [copy[index], copy[nextIndex]] = [copy[nextIndex], copy[index]];
+    setFamilyMembers(copy);
+  };
+  return <div className="card-enter" style={{display:"grid",gap:18}}>
+    <div style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:24,padding:24,boxShadow:theme.shadow}}>
+      <h1 style={{margin:"0 0 6px 0"}}>Paramètres famille</h1>
+      <div style={{color:theme.muted}}>Ajoute, modifie ou supprime les personnes utilisées dans les présences.</div>
+    </div>
+    <div style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:24,padding:20,boxShadow:theme.shadow}}>
+      <div style={{fontWeight:950,fontSize:18,marginBottom:12}}>Ajouter une personne</div>
+      <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+        <input value={name} onChange={e=>setName(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")addMember();}} placeholder="Prénom" style={{flex:"1 1 260px",padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text}} />
+        <button className="micro-btn" onClick={addMember} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:950,cursor:"pointer"}}>Ajouter</button>
+      </div>
+    </div>
+    <div style={{display:"grid",gap:12}}>
+      {familyMembers.map((member,index) => (
+        <div key={member} style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:20,padding:16,boxShadow:theme.shadow,display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+          <div style={{display:"flex",alignItems:"center",gap:12,flex:"1 1 260px"}}>
+            <div style={{width:44,height:44,borderRadius:16,background:theme.accentSoft,color:theme.accent,display:"grid",placeItems:"center",fontWeight:950}}>👤</div>
+            <input defaultValue={member} onBlur={e=>renameMember(member,e.target.value)} style={{flex:1,padding:"11px 12px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900}} />
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button className="micro-btn" onClick={()=>moveMember(member,-1)} disabled={index===0} style={{padding:"9px 11px",borderRadius:12,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer",opacity:index===0 ? .5 : 1}}>↑</button>
+            <button className="micro-btn" onClick={()=>moveMember(member,1)} disabled={index===familyMembers.length-1} style={{padding:"9px 11px",borderRadius:12,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer",opacity:index===familyMembers.length-1 ? .5 : 1}}>↓</button>
+            <button className="micro-btn" onClick={()=>removeMember(member)} style={{padding:"9px 11px",borderRadius:12,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>Supprimer</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>;
+}
+
+
+function DashboardTab({week,recipes,theme,setTab,generateSmartWeek,presence,familyMembers}) {
+ const meals = week.flatMap(day => [day.lunch, day.dinner]).filter(Boolean);
+ const plannedMeals = meals.filter(meal => meal?.recipeName || meal?.recipeId);
+ const favoriteMeals = plannedMeals.filter(meal => meal?.favorite).length;
+ const quickRecipes = recipes.filter(r => (r.tags||[]).some(t => String(t).toLowerCase().includes("rapide") || String(t).toLowerCase().includes("quick"))).slice(0,5);
+ const favoriteRecipes = recipes.filter(r => r.favorite).slice(0,5);
+ const missingMeals = Math.max(0, 14 - plannedMeals.length);
+ const totalPlannedPortions = week.reduce((sum, day) => sum
+   + getPortionCountForSlot(presence, familyMembers, getSlotFromDayAndMeal(day.day, "lunch"))
+   + getPortionCountForSlot(presence, familyMembers, getSlotFromDayAndMeal(day.day, "dinner")), 0);
+ const card = {background: theme.panel,border: `1px solid ${theme.border}`,borderRadius: 24,padding: 20,boxShadow: theme.shadow};
+
+ return <div className="card-enter" style={{display:"grid",gap:20}}>
+   <div style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap"}}>
+     <div>
+       <h1 style={{margin:"0 0 6px 0",fontSize:28}}>Dashboard</h1>
+       <div style={{color:theme.muted,fontSize:14}}>v13.2 : cockpit bureau pour menus, courses et recettes.</div>
+     </div>
+     <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+       <button className="micro-btn" onClick={()=>setTab("menus")} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>🍽️ Voir les menus</button>
+       <button className="micro-btn" onClick={()=>setTab("courses")} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>🛒 Voir les courses</button>
+       <button className="micro-btn" onClick={generateSmartWeek} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:900,cursor:"pointer"}}>⚡ Générer semaine</button>
+     </div>
+   </div>
+
+   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:16}}>
+     {[["🍽️", plannedMeals.length, "repas planifiés"],["👥", totalPlannedPortions, "portions semaine"],["📖", recipes.length, "recettes"],["⚠️", missingMeals, "créneaux libres"]].map(([icon,value,label]) => (
+       <div key={label} style={card}>
+         <div style={{fontSize:32,marginBottom:10}}>{icon}</div>
+         <div style={{fontSize:30,fontWeight:950,letterSpacing:"-.04em"}}>{value}</div>
+         <div style={{color:theme.muted,fontSize:13,fontWeight:800,marginTop:4}}>{label}</div>
+       </div>
+     ))}
+   </div>
+
+   <div style={{display:"grid",gridTemplateColumns:"1.35fr .9fr",gap:18,alignItems:"start"}}>
+     <div style={card}>
+       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginBottom:14}}>
+         <div>
+           <div style={{fontSize:12,color:theme.muted,fontWeight:950,textTransform:"uppercase",letterSpacing:".08em"}}>Cette semaine</div>
+           <h2 style={{margin:"4px 0 0 0",fontSize:22}}>Aperçu des repas</h2>
+         </div>
+         <button className="micro-btn" onClick={()=>setTab("menus")} style={{padding:"10px 12px",borderRadius:12,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>Ouvrir</button>
+       </div>
+       <div style={{display:"grid",gap:10}}>
+         {week.slice(0,7).map(day => (
+           <div key={day.day} style={{display:"grid",gridTemplateColumns:"90px 1fr 1fr",gap:10,alignItems:"center",padding:"10px 12px",border:`1px solid ${theme.border}`,borderRadius:16,background:theme.surface}}>
+             <div style={{fontWeight:950}}>{day.day}</div>
+             <div style={{fontSize:13}}><span style={{color:theme.muted,fontWeight:800}}>Midi · </span><strong>{day.lunch?.recipeName || "À choisir"}</strong><span style={{marginLeft:8,color:theme.accent,fontWeight:950}}>· {getPortionCountForSlot(presence,familyMembers,getSlotFromDayAndMeal(day.day,"lunch"))} p.</span></div>
+             <div style={{fontSize:13}}><span style={{color:theme.muted,fontWeight:800}}>Soir · </span><strong>{day.dinner?.recipeName || "À choisir"}</strong><span style={{marginLeft:8,color:theme.accent,fontWeight:950}}>· {getPortionCountForSlot(presence,familyMembers,getSlotFromDayAndMeal(day.day,"dinner"))} p.</span></div>
+           </div>
+         ))}
+       </div>
+     </div>
+
+     <div style={{display:"grid",gap:18}}>
+       <div style={card}>
+         <div style={{fontSize:12,color:theme.muted,fontWeight:950,textTransform:"uppercase",letterSpacing:".08em"}}>Recettes rapides</div>
+         <h2 style={{margin:"4px 0 14px 0",fontSize:22}}>À cuisiner vite</h2>
+         <div style={{display:"grid",gap:10}}>
+           {(quickRecipes.length ? quickRecipes : recipes.slice(0,5)).map(r => (
+             <button key={r.id} onClick={()=>setTab("recipes")} className="micro-btn" style={{border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,borderRadius:16,padding:"12px 14px",fontWeight:900,cursor:"pointer",textAlign:"left"}}>
+               {r.favorite ? "⭐ " : "📖 "}{r.name}
+             </button>
+           ))}
+         </div>
+       </div>
+       <div style={card}>
+         <div style={{fontSize:12,color:theme.muted,fontWeight:950,textTransform:"uppercase",letterSpacing:".08em"}}>Favoris</div>
+         <h2 style={{margin:"4px 0 14px 0",fontSize:22}}>Accès rapide</h2>
+         <div style={{display:"grid",gap:10}}>
+           {(favoriteRecipes.length ? favoriteRecipes : recipes.slice(0,4)).map(r => (
+             <div key={r.id} style={{border:`1px solid ${theme.border}`,background:theme.surface,borderRadius:16,padding:"12px 14px",fontWeight:850}}>⭐ {r.name}</div>
+           ))}
+         </div>
+       </div>
+     </div>
+   </div>
+ </div>
+}
+
+
+function RecipesTab({recipes,theme,onSelectRecipe,onEditRecipe,onCreateRecipe,onImportRecipe,onToggleFavorite}) {
+ const [search,setSearch]=useState(""); const [typeFilter,setTypeFilter]=useState("all"); const [favOnly,setFavOnly]=useState(false); const [lunchOnly,setLunchOnly]=useState(false);
+ const filtered=recipes.filter(r=>{const recipeSearchText = normalizeIngredients(r.ingredients||[]).map(ingredientText).join(" "); const txt=`${r.name} ${recipeSearchText} ${(r.tags||[]).join(" ")}`.toLowerCase(); return (!search.trim()||txt.includes(search.toLowerCase()))&&(typeFilter==="all"||r.mealType===typeFilter)&&(!favOnly||r.favorite)&&(!lunchOnly||isLunchBureauRecipe(r))});
+
+ return <div className="card-enter">
+<div style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap",marginBottom:14}}><div><h1 style={{margin:"0 0 6px 0",fontSize:24}}>Carnet de recettes</h1><div style={{color:theme.muted,fontSize:13}}>v14.1.1.1 : portions visibles dans menus.</div></div><div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button className="micro-btn" onClick={onCreateRecipe} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:900,cursor:"pointer"}}>+ Nouvelle recette / importer</button><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Rechercher..." style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,minWidth:240}} /><select value={typeFilter} onChange={e=>setTypeFilter(e.target.value)} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800}}><option value="all">Tous types</option><option value="light">Léger</option><option value="balanced">Équilibré</option><option value="single">Plat unique</option></select><button className="micro-btn" onClick={()=>setFavOnly(v=>!v)} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${favOnly?theme.accent:theme.border}`,background:favOnly?theme.accentSoft:theme.surface,color:favOnly?theme.accent:theme.text,fontWeight:800,cursor:"pointer"}}>⭐ Favoris</button><button className="micro-btn" onClick={()=>setLunchOnly(v=>!v)} style={{padding:"12px 14px",borderRadius:14,border:`1px solid ${lunchOnly?theme.accent:theme.border}`,background:lunchOnly?theme.accentSoft:theme.surface,color:lunchOnly?theme.accent:theme.text,fontWeight:800,cursor:"pointer"}}>💼 Lunch Bureau</button></div></div>
+ <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:12}}>{filtered.map(r=><div key={r.id} className="card-enter premium-hover" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:14,boxShadow:theme.shadow,transition:"transform .14s ease"}}><div style={{height:78,borderRadius:16,background:theme.surface2,border:`1px solid ${theme.border}`,display:"flex",alignItems:"center",justifyContent:"center",color:theme.muted,fontSize:12,overflow:"hidden"}}>{getRecipePhoto(r)?<img src={getRecipePhoto(r)} alt={r.name} onError={e=>{e.currentTarget.style.display="none"}} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:"photo recette"}</div><div style={{display:"flex",justifyContent:"space-between",gap:10,alignItems:"start",marginTop:12}}><div><div style={{fontWeight:900,fontSize:16}}>{r.name}</div><div style={{color:theme.muted,fontSize:12,marginTop:5}}>{typeLabel(r.mealType)} • {r.device||"—"}</div></div><button className="micro-btn" onClick={()=>onToggleFavorite(r.id)} style={{border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,borderRadius:12,width:34,height:34,cursor:"pointer"}}>{r.favorite?"⭐":"☆"}</button></div><div style={{color:theme.muted,fontSize:12,marginTop:10,minHeight:32}}>{normalizeIngredients(r.ingredients||[]).slice(0,4).map(ingredientText).join(", ")}</div><div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:10}}>{(r.tags||[]).slice(0,3).map(t=><span key={t} style={{fontSize:11,padding:"4px 8px",borderRadius:999,border:`1px solid ${LUNCH_BUREAU_TAGS.includes(t)?lunchTagStyle(t,theme).color:theme.border}`,background:LUNCH_BUREAU_TAGS.includes(t)?lunchTagStyle(t,theme).background:"transparent",color:LUNCH_BUREAU_TAGS.includes(t)?lunchTagStyle(t,theme).color:theme.muted,fontWeight:LUNCH_BUREAU_TAGS.includes(t)?900:700}}>#{t}</span>)}</div><div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:12}}><button className="micro-btn" onClick={()=>onSelectRecipe(r.id)} style={{padding:"9px 12px",borderRadius:12,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800,cursor:"pointer"}}>Voir</button><button className="micro-btn" onClick={()=>onEditRecipe(r.id)} style={{padding:"9px 12px",borderRadius:12,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:800,cursor:"pointer"}}>Modifier</button></div></div>)}</div>{filtered.length===0&&<div style={{marginTop:16,background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:18,color:theme.muted}}>Aucune recette.</div>}</div>
+}
+
+
+function WhatsNewModal({ theme, onClose, versionInfo }) {
+  const info = versionInfo || {};
+  const version = info.version || APP_VERSION;
+  const subtitle = info.subtitle || APP_SUBTITLE;
+  const items = Array.isArray(info.whatsNew) && info.whatsNew.length ? info.whatsNew : APP_WHATS_NEW;
 
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.48)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:120,padding:20}}>
       <div className="modal-pop" style={{width:"min(560px,100%)",background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:24,boxShadow:theme.shadowStrong,padding:26,textAlign:"center"}}>
         <div style={{width:72,height:72,borderRadius:999,border:`3px solid ${theme.accent}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 18px",fontSize:34,color:theme.accent}}>✓</div>
-        <div style={{fontWeight:900,fontSize:28,marginBottom:6}}>Version 12.5</div>
-        <div style={{color:theme.accent,fontWeight:900,fontSize:16,marginBottom:22}}>Import URL proxy</div>
+        <div style={{fontWeight:900,fontSize:28,marginBottom:6}}>Version {version}</div>
+        <div style={{color:theme.accent,fontWeight:900,fontSize:16,marginBottom:22}}>{subtitle}</div>
         <div style={{height:1,background:theme.border,margin:"0 0 20px"}} />
         <div style={{textAlign:"left"}}>
           <div style={{fontWeight:900,fontSize:17,marginBottom:12}}>Nouveautés</div>
@@ -2928,9 +3360,45 @@ function WhatsNewModal({ theme, onClose }) {
   );
 }
 
-
 export default function App() {
- const [themeName,setThemeName]=useState("light"); const [showWhatsNew,setShowWhatsNew]=useState(()=>localStorage.getItem("menuFamille_v12_5_seen")!=="yes"); const theme=themeName==="light"?themeLight:themeDark; const [tab,setTab]=useState("menus"); const [recipes,setRecipes]=useState(INITIAL_RECIPES);
+ const [themeName,setThemeName]=useState("light"); const [versionInfo,setVersionInfo]=useState({version:APP_VERSION,subtitle:APP_SUBTITLE,whatsNew:APP_WHATS_NEW}); const [showWhatsNew,setShowWhatsNew]=useState(()=>localStorage.getItem(`menuFamille_v${APP_VERSION}_seen`)!=="yes"); const theme=themeName==="light"?themeLight:themeDark;
+useEffect(() => {
+  fetch("/version.json", { cache: "no-store" })
+    .then(res => res.ok ? res.json() : null)
+    .then(data => {
+      if (!data) return;
+      setVersionInfo(data);
+      if (localStorage.getItem(`menuFamille_v${data.version}_seen`) !== "yes") setShowWhatsNew(true);
+    })
+    .catch(() => {});
+}, []); 
+const [familyMembers, setFamilyMembers] = useState(() => {
+  try {
+    const saved = JSON.parse(localStorage.getItem("menuFamille_family_members") || "null");
+    if (Array.isArray(saved) && saved.length) return saved;
+  } catch (e) {}
+  return DEFAULT_FAMILY_MEMBERS;
+});
+
+const [presence, setPresence] = useState(() => {
+  try {
+    const members = JSON.parse(localStorage.getItem("menuFamille_family_members") || "null") || DEFAULT_FAMILY_MEMBERS;
+    const saved = JSON.parse(localStorage.getItem("menuFamille_presence") || "null");
+    if (saved) return normalizePresenceForMembers(saved, members);
+  } catch (e) {}
+  return getDefaultPresence(DEFAULT_FAMILY_MEMBERS);
+});
+
+useEffect(() => {
+  localStorage.setItem("menuFamille_family_members", JSON.stringify(familyMembers));
+  setPresence(prev => normalizePresenceForMembers(prev, familyMembers));
+}, [familyMembers]);
+
+useEffect(() => {
+  localStorage.setItem("menuFamille_presence", JSON.stringify(presence));
+}, [presence]);
+
+const [tab,setTab]=useState("dashboard"); const [recipes,setRecipes]=useState(INITIAL_RECIPES);
  useEffect(() => {
    setWeek(prev => prev.map(day => ({
      ...day,
@@ -2951,13 +3419,206 @@ export default function App() {
  const handleDragStart=(i,slot)=>e=>{setDragState({dayIndex:i,slot}); setDragPointer({x:e.clientX,y:e.clientY}); e.dataTransfer.effectAllowed="move"; const c=document.createElement("canvas"); c.width=1;c.height=1;e.dataTransfer.setDragImage(c,0,0); setToast("Glisser-déposer actif")};
  const handleDragOver=(i,slot)=>e=>{e.preventDefault(); setDropTarget({dayIndex:i,slot}); setDragPointer({x:e.clientX,y:e.clientY})};
  const handleDrop=(i,slot)=>e=>{e.preventDefault(); if(!dragState)return; const from=dragState,to={dayIndex:i,slot}; setWeek(prev=>{const next=clone(prev), source=clone(next[from.dayIndex][from.slot]), target=clone(next[to.dayIndex][to.slot]); if(!target.recipeId){next[to.dayIndex][to.slot]={...source,locked:next[to.dayIndex][to.slot].locked}; next[from.dayIndex][from.slot]=emptyMeal()} else {next[to.dayIndex][to.slot]={...source,locked:next[to.dayIndex][to.slot].locked}; next[from.dayIndex][from.slot]={...target,locked:next[from.dayIndex][from.slot].locked}} return next}); setToast("Repas déplacé"); pushHistory("Repas déplacé par glisser-déposer"); setDragState(null); setDropTarget(null)};
- const navItems=[["menus","Menus"],["courses","Courses"],["recipes","Recettes"],["family","Famille"],["settings","Paramètres"]]; const displayItems=[...filteredWeek,{type:"stats"}];
- return <div style={{minHeight:"100vh",background:theme.bg,color:theme.text,fontFamily:"Arial, sans-serif"}} onDragEnd={()=>{setDragState(null);setDropTarget(null)}}>
+ const navItems=[["dashboard","Dashboard"],["menus","Menus"],["courses","Courses"],["recipes","Recettes"],["presence","Présences"],["family","Famille"],["settings","Paramètres"]]; const displayItems=[...filteredWeek,{type:"stats"}];
+ return <div className="mobile-page-padding desktop-v13-root" style={{minHeight:"100vh",background:theme.bg,color:theme.text,fontFamily:"Arial, sans-serif"}} onDragEnd={()=>{setDragState(null);setDropTarget(null)}}>
  <div style={{position:"fixed",right:12,bottom:12,zIndex:9999,background:"#16a34a",color:"#fff",padding:"10px 14px",borderRadius:999,fontWeight:900,boxShadow:"0 8px 24px rgba(0,0,0,.25)"}}>
-   MARQUEUR BUILD v12.5
+   MARQUEUR BUILD v14.1.1.1
+   <button className="micro-btn" onClick={()=>setShowWhatsNew(true)} title="Revoir les nouveautés" style={{marginLeft:10,border:"none",background:"rgba(255,255,255,.18)",color:"#fff",borderRadius:999,padding:"3px 8px",fontWeight:950,cursor:"pointer"}}>?</button>
  </div>
- {showWhatsNew && <WhatsNewModal theme={theme} onClose={() => { localStorage.setItem("menuFamille_v12_5_seen","yes"); setShowWhatsNew(false); }} />}
+ <aside className="desktop-v13-sidebar">
+   <div>
+     <div style={{padding:"26px 22px",borderBottom:"1px solid rgba(148,163,184,.18)"}}>
+       <div style={{fontSize:24,fontWeight:950,letterSpacing:"-.04em",display:"flex",alignItems:"center",gap:10}}>
+         <span>🍴</span><span>Menu Famille</span>
+       </div>
+       <div style={{fontSize:13,color:"#94a3b8",marginTop:6,fontWeight:750}}>Desktop Premium v14.1.1.1</div>
+     </div>
+     <nav style={{padding:14,display:"grid",gap:6}}>
+       {navItems.map(([key,label]) => (
+         <button key={`desktop-v13-${key}`} className={`desktop-v13-nav-btn ${tab===key ? "active" : ""}`} onClick={()=>setTab(key)}>
+           <span style={{fontSize:21}}>{key==="dashboard" ? "🏠" : key==="menus" ? "🍽️" : key==="courses" ? "🛒" : key==="recipes" ? "📖" : key==="presence" ? "📅" : key==="family" ? "👨‍👩‍👧" : "⚙️"}</span>
+           <span>{label}</span>
+         </button>
+       ))}
+     </nav>
+   </div>
+   <div style={{padding:16,borderTop:"1px solid rgba(148,163,184,.18)"}}>
+     <div style={{background:"rgba(255,255,255,.07)",border:"1px solid rgba(148,163,184,.18)",borderRadius:22,padding:16}}>
+       <div style={{fontSize:11,color:"#64748b",fontWeight:950,textTransform:"uppercase",letterSpacing:".08em"}}>Mode local</div>
+       <div style={{marginTop:8,fontWeight:900,color:"#e2e8f0"}}>v14.1.1.1 Desktop</div>
+       <div style={{marginTop:8,fontSize:12,color:"#94a3b8",lineHeight:1.4}}>Sidebar réellement injectée. Base bureau premium.</div>
+     </div>
+   </div>
+ </aside>
+
+ <aside className="desktop-v13-right-panel">
+   <div style={{padding:24,display:"grid",gap:18}}>
+     <div className="desktop-v13-card">
+       <div style={{fontSize:12,color:"#64748b",fontWeight:950,textTransform:"uppercase",letterSpacing:".08em"}}>Contexte</div>
+       <div style={{fontSize:24,fontWeight:950,letterSpacing:"-.04em",marginTop:8}}>
+         {tab==="dashboard" ? "Dashboard" : tab==="menus" ? "Menus semaine" : tab==="courses" ? "Liste de courses" : tab==="recipes" ? "Carnet recettes" : tab==="presence" ? "Présences" : tab==="family" ? "Famille" : "Paramètres"}
+       </div>
+       <div style={{fontSize:13,color:"#64748b",lineHeight:1.45,marginTop:8}}>
+         Panneau droit contextuel. Les portions sont maintenant calculées depuis les présences.
+       </div>
+     </div>
+
+     <div className="desktop-v13-card">
+       <div style={{fontSize:16,fontWeight:950,marginBottom:12}}>Actions rapides</div>
+       <div style={{display:"grid",gap:10}}>
+         <button className="micro-btn" onClick={()=>setTab("menus")} style={{border:"1px solid #cbd5e1",background:"#fff",borderRadius:16,padding:"12px 14px",fontWeight:900,cursor:"pointer",textAlign:"left"}}>🍽️ Menus</button>
+         <button className="micro-btn" onClick={()=>setTab("courses")} style={{border:"1px solid #cbd5e1",background:"#fff",borderRadius:16,padding:"12px 14px",fontWeight:900,cursor:"pointer",textAlign:"left"}}>🛒 Courses</button>
+         <button className="micro-btn" onClick={()=>setTab("recipes")} style={{border:"1px solid #cbd5e1",background:"#fff",borderRadius:16,padding:"12px 14px",fontWeight:900,cursor:"pointer",textAlign:"left"}}>📖 Recettes</button>
+       </div>
+     </div>
+
+     <div style={{background:"#020617",color:"#fff",borderRadius:24,padding:18}}>
+       <div style={{fontSize:12,color:"#64748b",fontWeight:950,textTransform:"uppercase",letterSpacing:".08em"}}>Marqueur</div>
+       <div style={{fontSize:22,fontWeight:950,marginTop:8}}>v13.1.1</div>
+       <div style={{fontSize:13,color:"#94a3b8",lineHeight:1.45,marginTop:8}}>Si tu vois cette colonne, le nouveau shell bureau est actif.</div>
+       <button className="micro-btn" onClick={()=>setShowWhatsNew(true)} style={{marginTop:14,width:"100%",border:"1px solid rgba(148,163,184,.35)",background:"rgba(255,255,255,.08)",color:"#fff",borderRadius:14,padding:"11px 12px",fontWeight:950,cursor:"pointer"}}>
+         Revoir les nouveautés
+       </button>
+     </div>
+   </div>
+ </aside>
+
+ {showWhatsNew && <WhatsNewModal theme={theme} versionInfo={versionInfo} onClose={() => { localStorage.setItem(`menuFamille_v${versionInfo.version}_seen`,"yes"); setShowWhatsNew(false); }} />}
  <style>{`
+/* v14.1.1.1 Desktop Premium visible shell */
+@media (min-width: 1100px) {
+  .desktop-v13-root {
+    padding-left: 260px !important;
+    padding-right: 340px !important;
+  }
+
+  .desktop-v13-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 260px;
+    z-index: 120;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(180deg, #020617, #0f172a);
+    color: white;
+    border-right: 1px solid rgba(148, 163, 184, .22);
+    box-shadow: 12px 0 40px rgba(15, 23, 42, .18);
+  }
+
+  .desktop-v13-right-panel {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: 340px;
+    z-index: 110;
+    display: block;
+    background: rgba(255, 255, 255, .94);
+    color: #0f172a;
+    border-left: 1px solid rgba(148, 163, 184, .28);
+    box-shadow: -12px 0 40px rgba(15, 23, 42, .10);
+    overflow: auto;
+  }
+
+  .desktop-v13-nav-btn {
+    width: 100%;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #cbd5e1;
+    border-radius: 18px;
+    padding: 13px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-weight: 850;
+    text-align: left;
+    transition: all .16s ease;
+  }
+
+  .desktop-v13-nav-btn:hover {
+    background: rgba(255, 255, 255, .08);
+    color: #fff;
+    transform: translateX(2px);
+  }
+
+  .desktop-v13-nav-btn.active {
+    background: rgba(20, 184, 166, .16);
+    border-color: rgba(20, 184, 166, .38);
+    color: #5eead4;
+    box-shadow: 0 10px 30px rgba(20, 184, 166, .10);
+  }
+
+  .desktop-v13-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 18px;
+  }
+}
+
+@media (max-width: 1099px) {
+  .desktop-v13-sidebar,
+  .desktop-v13-right-panel {
+    display: none !important;
+  }
+
+  .desktop-v13-root {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* v12.9 navigation mobile */
+.mobile-bottom-nav {
+  display: none;
+}
+@media (max-width: 760px) {
+  .mobile-bottom-nav {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    z-index: 9990;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    padding: 8px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.94);
+    border: 1px solid rgba(148,163,184,.35);
+    box-shadow: 0 16px 40px rgba(15,23,42,.24);
+    backdrop-filter: blur(16px);
+  }
+  .mobile-bottom-nav button {
+    min-height: 54px !important;
+    border-radius: 16px !important;
+    padding: 6px 4px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    font-size: 11px !important;
+    line-height: 1.05 !important;
+    white-space: nowrap !important;
+  }
+  .mobile-page-padding {
+    padding-bottom: 92px !important;
+  }
+}
+@media (max-width: 380px) {
+  .mobile-bottom-nav {
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    gap: 4px;
+    padding: 6px;
+  }
+  .mobile-bottom-nav button {
+    font-size: 10px !important;
+  }
+}
+
 /* v12.5 responsive total */
 html, body, #root {
   min-height: 100%;
@@ -3061,8 +3722,67 @@ button, input, select, textarea {
  {recipeEditId&&<RecipeFormModal mode="edit" recipe={recipeBeingEdited} theme={theme} onClose={()=>setRecipeEditId(null)} onSave={saveRecipe} />}
  {creatingRecipe&&<RecipeFormModal mode="create" recipe={null} theme={theme} onClose={()=>setCreatingRecipe(false)} onSave={saveRecipe} />}{draftRecipe&&<RecipeFormModal mode="create" recipe={draftRecipe} theme={theme} onClose={()=>setDraftRecipe(null)} onSave={saveRecipe} />}{importingRecipe&&<ImportRecipeModal theme={theme} onClose={()=>setImportingRecipe(false)} onCreate={(recipe)=>{saveRecipe(recipe,"create"); setImportingRecipe(false)}} onEditBeforeCreate={(recipe)=>{setDraftRecipe(recipe); setImportingRecipe(false)}} />}
  <div style={{maxWidth:1480,margin:"0 auto",padding:"24px 20px 30px"}}>
- {tab==="menus"?<><div className="card-enter" style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap",marginBottom:14}}><div><h1 style={{margin:"0 0 6px 0",fontSize:24}}>Menus de la semaine</h1><div style={{color:theme.muted,fontSize:13}}>v12.5 : optimisation responsive totale.</div></div><div style={{display:"flex",gap:12,flexWrap:"wrap"}}><button className="micro-btn" onClick={()=>setTab("courses")} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>🛒 Voir les courses</button><button className="micro-btn" onClick={()=>setShowSuggest(true)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:900,cursor:"pointer"}}>💡 Suggérer un repas</button><button className="micro-btn" onClick={generateSmartWeek} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>⚡ Générer semaine</button><select value={visualFilter} onChange={e=>setVisualFilter(e.target.value)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800}}><option value="all">Filtre : tous</option><option value="favorites">Favoris</option><option value="locked">Verrouillés</option><option value="empty">Repas vides</option><option value="light">Légers</option><option value="balanced">Équilibrés</option><option value="single">Plats uniques</option></select><button className="micro-btn" onClick={()=>setShowHistory(v=>!v)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800,cursor:"pointer"}}>{showHistory?"Masquer l’historique":"Voir l’historique"}</button></div></div>
+ {tab==="presence"?<PresenceSettingsTab theme={theme} familyMembers={familyMembers} presence={presence} setPresence={setPresence}/>:tab==="dashboard"?<DashboardTab week={week} recipes={recipes} theme={theme} setTab={setTab} generateSmartWeek={generateSmartWeek} presence={presence} familyMembers={familyMembers}/>:tab==="menus"?<><div className="card-enter" style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",flexWrap:"wrap",marginBottom:14}}><div><h1 style={{margin:"0 0 6px 0",fontSize:24}}>Menus de la semaine</h1><div style={{color:theme.muted,fontSize:13}}>v14.1.1.1 : portions visibles dans menus.</div></div><div style={{display:"flex",gap:12,flexWrap:"wrap"}}><button className="micro-btn" onClick={()=>setTab("courses")} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>🛒 Voir les courses</button><button className="micro-btn" onClick={()=>setShowSuggest(true)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",fontWeight:900,cursor:"pointer"}}>💡 Suggérer un repas</button><button className="micro-btn" onClick={generateSmartWeek} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:900,cursor:"pointer"}}>⚡ Générer semaine</button><select value={visualFilter} onChange={e=>setVisualFilter(e.target.value)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800}}><option value="all">Filtre : tous</option><option value="favorites">Favoris</option><option value="locked">Verrouillés</option><option value="empty">Repas vides</option><option value="light">Légers</option><option value="balanced">Équilibrés</option><option value="single">Plats uniques</option></select><button className="micro-btn" onClick={()=>setShowHistory(v=>!v)} style={{padding:"12px 16px",borderRadius:14,border:`1px solid ${theme.border}`,background:theme.surface,color:theme.text,fontWeight:800,cursor:"pointer"}}>{showHistory?"Masquer l’historique":"Voir l’historique"}</button></div></div>
  {showHistory&&<div className="card-enter" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:16,boxShadow:theme.shadow,marginBottom:14}}><div style={{fontWeight:900,marginBottom:10}}>Historique rapide</div>{history.length===0?<div style={{color:theme.muted,fontSize:13}}>Aucune action enregistrée.</div>:history.map((h,i)=><div key={i} style={{padding:"10px 12px",borderRadius:12,background:theme.surface,border:`1px solid ${theme.border}`,marginBottom:8}}><div style={{fontWeight:700,fontSize:13}}>{h.label}</div><div style={{fontSize:11,color:theme.muted,marginTop:2}}>{h.at}</div></div>)}</div>}
- <div style={{display:"grid",gap:12,gridTemplateColumns:"repeat(4,minmax(180px,1fr))",alignItems:"start"}}>{displayItems.map(item=>{if(item.type==="stats")return <StatsCard key="stats" week={week} theme={theme}/>; const i=week.findIndex(w=>w.day===item.day); return <div key={item.day} className="card-enter" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:12,boxShadow:theme.shadow}}><div style={{textAlign:"center",fontWeight:900,fontSize:15,marginBottom:10}}>{item.day}</div><div style={{display:"grid",gap:10}}>{item.showLunch&&<MealCard label="Midi" meal={item.lunch} theme={theme} onQuick={()=>setRecipeSheetId(item.lunch.recipeId)} onEdit={()=>item.lunch.recipeId&&setRecipeEditId(item.lunch.recipeId)} onLock={()=>toggleLock(i,"lunch")} onDragStart={handleDragStart(i,"lunch")} onDragOver={handleDragOver(i,"lunch")} onDrop={handleDrop(i,"lunch")} isDropTarget={dropTarget?.dayIndex===i&&dropTarget?.slot==="lunch"} isDraggingSource={dragState?.dayIndex===i&&dragState?.slot==="lunch"}/>}{item.showDinner&&<MealCard label="Soir" meal={item.dinner} theme={theme} onQuick={()=>setRecipeSheetId(item.dinner.recipeId)} onEdit={()=>item.dinner.recipeId&&setRecipeEditId(item.dinner.recipeId)} onLock={()=>toggleLock(i,"dinner")} onDragStart={handleDragStart(i,"dinner")} onDragOver={handleDragOver(i,"dinner")} onDrop={handleDrop(i,"dinner")} isDropTarget={dropTarget?.dayIndex===i&&dropTarget?.slot==="dinner"} isDraggingSource={dragState?.dayIndex===i&&dragState?.slot==="dinner"}/>}</div></div>})}</div></>:tab==="recipes"?<RecipesTab recipes={recipes} theme={theme} onSelectRecipe={setRecipeSheetId} onEditRecipe={setRecipeEditId} onCreateRecipe={()=>setCreatingRecipe(true)} onImportRecipe={()=>setImportingRecipe(true)} onToggleFavorite={toggleRecipeFavorite}/>:tab==="courses"?<CoursesTab week={week} recipes={recipes} theme={theme}/>:<div className="card-enter" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:22,padding:24,boxShadow:theme.shadow}}><div style={{fontWeight:900,fontSize:24,marginBottom:8}}>{navItems.find(([k])=>k===tab)?.[1]}</div><div style={{color:theme.muted}}>Onglet disponible. Base stable conservée.</div></div>}
+ <MenusPremiumPanel week={week} theme={theme} onGenerate={generateSmartWeek} onSuggest={()=>setShowSuggest(true)} onShowShopping={()=>setTab("courses")} />
+ <div style={{display:"grid",gap:14,gridTemplateColumns:"repeat(4,minmax(180px,1fr))",alignItems:"start"}}>{displayItems.map(item=>{if(item.type==="stats")return <StatsCard key="stats" week={week} theme={theme}/>; const i=week.findIndex(w=>w.day===item.day); return <div key={item.day} className="card-enter" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:18,padding:12,boxShadow:theme.shadow}}><div style={{textAlign:"center",fontWeight:900,fontSize:15,marginBottom:10}}>{item.day}</div><div style={{display:"grid",gap:10}}>{item.showLunch&&<MealCard label="Midi" meal={item.lunch} theme={theme} onQuick={()=>setRecipeSheetId(item.lunch.recipeId)} onEdit={()=>item.lunch.recipeId&&setRecipeEditId(item.lunch.recipeId)} onLock={()=>toggleLock(i,"lunch")} onDragStart={handleDragStart(i,"lunch")} onDragOver={handleDragOver(i,"lunch")} onDrop={handleDrop(i,"lunch")} isDropTarget={dropTarget?.dayIndex===i&&dropTarget?.slot==="lunch"} isDraggingSource={dragState?.dayIndex===i&&dragState?.slot==="lunch"} dayName={item.day} slotKey="lunch" presence={presence} familyMembers={familyMembers}/>}{item.showDinner&&<MealCard label="Soir" meal={item.dinner} theme={theme} onQuick={()=>setRecipeSheetId(item.dinner.recipeId)} onEdit={()=>item.dinner.recipeId&&setRecipeEditId(item.dinner.recipeId)} onLock={()=>toggleLock(i,"dinner")} onDragStart={handleDragStart(i,"dinner")} onDragOver={handleDragOver(i,"dinner")} onDrop={handleDrop(i,"dinner")} isDropTarget={dropTarget?.dayIndex===i&&dropTarget?.slot==="dinner"} isDraggingSource={dragState?.dayIndex===i&&dragState?.slot==="dinner"} dayName={item.day} slotKey="dinner" presence={presence} familyMembers={familyMembers}/>}</div></div>})}</div></>:tab==="recipes"?<RecipesTab recipes={recipes} theme={theme} onSelectRecipe={setRecipeSheetId} onEditRecipe={setRecipeEditId} onCreateRecipe={()=>setCreatingRecipe(true)} onImportRecipe={()=>setImportingRecipe(true)} onToggleFavorite={toggleRecipeFavorite}/>:tab==="courses"?<CoursesTab week={week} recipes={recipes} theme={theme}/>:tab==="family"?<FamilySettingsTab theme={theme} familyMembers={familyMembers} setFamilyMembers={setFamilyMembers} setPresence={setPresence}/>:<div className="card-enter" style={{background:theme.panel,border:`1px solid ${theme.border}`,borderRadius:22,padding:24,boxShadow:theme.shadow}}><div style={{fontWeight:900,fontSize:24,marginBottom:8}}>{navItems.find(([k])=>k===tab)?.[1]}</div><div style={{color:theme.muted,marginBottom:16}}>Onglet disponible. Base stable conservée.</div>{tab==="settings"&&<div style={{marginTop:14,padding:16,border:`1px solid ${theme.border}`,borderRadius:18,background:theme.surface}}>
+      <div style={{fontWeight:950,marginBottom:8}}>Tags Lunch Bureau disponibles</div>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+        {LUNCH_BUREAU_TAGS.map(tag => <span key={tag} style={{fontSize:12,padding:"6px 10px",borderRadius:999,background:lunchTagStyle(tag,theme).background,color:lunchTagStyle(tag,theme).color,fontWeight:900}}>{tag}</span>)}
+      </div>
+    </div>}{tab==="settings"&&<button className="micro-btn" onClick={()=>setShowWhatsNew(true)} style={{border:`1px solid ${theme.accent}`,background:theme.accent,color:"#fff",borderRadius:14,padding:"12px 16px",fontWeight:950,cursor:"pointer"}}>Revoir les nouveautés</button>}</div>}
  </div></div>
 }
+
+const DEFAULT_FAMILY_MEMBERS = ["Micky", "Angélique", "Malone"];
+const PRESENCE_DAYS = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+const PRESENCE_MOMENTS = ["midi","soir"];
+const PRESENCE_SLOTS = PRESENCE_DAYS.flatMap(day => PRESENCE_MOMENTS.map(moment => `${day} ${moment}`));
+
+
+function getSlotFromDayAndMeal(day, mealKey) {
+  const dayMap = {"Lundi":"Lun","Mardi":"Mar","Mercredi":"Mer","Jeudi":"Jeu","Vendredi":"Ven","Samedi":"Sam","Dimanche":"Dim"};
+  const moment = mealKey === "lunch" ? "midi" : "soir";
+  return `${dayMap[day] || day} ${moment}`;
+}
+function getPresentMembersForSlot(presence, familyMembers, slot) {
+  return familyMembers.filter(member => !!presence?.[member]?.[slot]);
+}
+function getPortionCountForSlot(presence, familyMembers, slot) {
+  return getPresentMembersForSlot(presence, familyMembers, slot).length;
+}
+
+function getDefaultPresenceForMember(member, slot) {
+  if (member === "Micky") return true;
+  if (member === "Angélique") return slot !== "Mer midi";
+  if (member === "Malone") return slot.includes("soir") || slot === "Mer midi";
+  return slot.includes("soir");
+}
+
+function getDefaultPresence(members = DEFAULT_FAMILY_MEMBERS) {
+  const data = {};
+  members.forEach(member => {
+    data[member] = {};
+    PRESENCE_SLOTS.forEach(slot => data[member][slot] = getDefaultPresenceForMember(member, slot));
+  });
+  return data;
+}
+
+function normalizePresenceForMembers(presence, members) {
+  const next = {};
+  members.forEach(member => {
+    next[member] = {};
+    PRESENCE_SLOTS.forEach(slot => next[member][slot] = presence?.[member]?.[slot] ?? getDefaultPresenceForMember(member, slot));
+  });
+  return next;
+}
+
+function saveLearnedCategory(name, category) {
+  try {
+    const learned = JSON.parse(localStorage.getItem("menuFamilleLearnedCategories") || "{}");
+    learned[String(name).toLowerCase().trim()] = category;
+    localStorage.setItem("menuFamilleLearnedCategories", JSON.stringify(learned));
+  } catch (e) {}
+}
+
+

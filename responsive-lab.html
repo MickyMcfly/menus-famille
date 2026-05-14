@@ -1,15 +1,70 @@
-{
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "responsive": "vite --host 0.0.0.0"
-  },
-  "dependencies": {
-    "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "react": "latest",
-    "react-dom": "latest"
-  },
-  "devDependencies": {}
-}
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Responsive Lab Pro — Menu Famille</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0f172a;color:white;overflow:hidden}
+header{min-height:72px;padding:14px 18px;background:#111827;border-bottom:1px solid rgba(255,255,255,.14);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+h1{font-size:20px;margin:0}.hint{font-size:12px;color:#94a3b8;margin-top:4px}
+button,input{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:white;border-radius:12px;padding:9px 11px;font-weight:800}
+button{cursor:pointer}button:hover{background:rgba(255,255,255,.14)}.accent{background:#14b8a6;border-color:#14b8a6;color:#052e2b}
+main{height:calc(100vh - 72px);display:grid;grid-template-columns:320px 1fr;overflow:hidden}
+aside{background:#111827;border-right:1px solid rgba(255,255,255,.14);padding:16px;overflow:auto}
+.panel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:14px;margin-bottom:14px}
+.panel h2{font-size:15px;margin:0 0 10px}.note{font-size:12px;line-height:1.4;color:#ccfbf1;background:rgba(20,184,166,.12);border:1px solid rgba(20,184,166,.26);border-radius:14px;padding:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}label{display:grid;gap:5px;font-size:12px;color:#94a3b8;font-weight:800}input{width:100%}
+.presets{display:grid;gap:8px}.preset{width:100%;display:flex;justify-content:space-between;text-align:left}.preset span{color:#94a3b8;font-size:11px}
+.workspace{overflow:auto;padding:24px}.workspace.single{display:flex;align-items:flex-start;justify-content:center}
+.device{display:inline-grid;gap:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:26px;padding:14px;margin:0 18px 18px 0;box-shadow:0 20px 60px rgba(0,0,0,.32);resize:both;overflow:auto;min-width:260px;min-height:360px;vertical-align:top}
+.device.selected{outline:3px solid #14b8a6}.device-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.device-title strong{display:block;font-size:14px}.device-title span{color:#94a3b8;font-size:12px}
+.actions{display:flex;gap:6px}.actions button{padding:7px 9px;border-radius:10px}
+.shell{background:#020617;border-radius:22px;padding:10px;overflow:auto;width:100%;height:100%;min-height:260px}iframe{border:0;background:white;border-radius:16px;display:block;transform-origin:top left}
+code{background:rgba(255,255,255,.1);padding:2px 5px;border-radius:6px}
+@media(max-width:900px){body{overflow:auto}main{height:auto;grid-template-columns:1fr}.workspace{overflow:visible}aside{border-right:0;border-bottom:1px solid rgba(255,255,255,.14)}}
+</style>
+</head>
+<body>
+<header>
+<div><h1>Responsive Lab Pro — Menu Famille</h1><div class="hint">Redimensionnable : téléphone, tablette, desktop, custom.</div></div>
+<div><button onclick="reloadAll()">Recharger</button> <button onclick="changeUrl()">Changer URL</button> <button class="accent" onclick="addDevice()">+ Vue</button></div>
+</header>
+<main>
+<aside>
+<div class="panel"><h2>URL testée</h2><div class="note"><strong id="urlLabel"></strong><br>Lance d’abord <code>npm run dev</code>.</div></div>
+<div class="panel"><h2>Vue sélectionnée</h2><div class="grid2">
+<label>Largeur<input id="w" type="number" onchange="applyInputs()"></label>
+<label>Hauteur<input id="h" type="number" onchange="applyInputs()"></label>
+<label>Zoom<input id="z" type="number" onchange="applyInputs()"></label>
+<label>Nom<input id="n" type="text" onchange="applyInputs()"></label>
+</div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button onclick="rotate()">Rotation</button><button onclick="duplicate()">Dupliquer</button><button onclick="removeDevice()">Supprimer</button></div></div>
+<div class="panel"><h2>Presets</h2><div class="presets" id="presets"></div></div>
+<div class="panel"><h2>Affichage</h2><div style="display:grid;gap:8px"><button onclick="layout='multi';save();render()">Multi-vues</button><button onclick="layout='single';save();render()">Vue unique</button><button onclick="fitSelected()">Agrandir sélection</button></div></div>
+<div class="panel"><h2>À vérifier</h2><div class="note">Pas de scroll horizontal, header lisible, boutons au doigt, modales, courses, recettes, mode magasin.</div></div>
+</aside>
+<section class="workspace" id="workspace"></section>
+</main>
+<script>
+const presets=[["iPhone SE",375,667],["iPhone 12/13",390,844],["Pixel 7",412,915],["Galaxy S20",360,800],["iPad Mini",768,1024],["iPad Pro",1024,1366],["Tablette paysage",1024,768],["Desktop HD",1366,768],["Desktop large",1600,900],["Full HD",1920,1080]];
+let appUrl=localStorage.getItem("mf_lab_url")||"http://localhost:5173";
+let devices=JSON.parse(localStorage.getItem("mf_lab_devices")||"null")||[{id:crypto.randomUUID(),name:"Téléphone",w:390,h:844,z:100},{id:crypto.randomUUID(),name:"Tablette",w:768,h:1024,z:75},{id:crypto.randomUUID(),name:"Desktop",w:1366,h:768,z:60}];
+let selectedId=devices[0].id;let layout=localStorage.getItem("mf_lab_layout")||"multi";
+const workspace=document.getElementById("workspace");
+function save(){localStorage.setItem("mf_lab_devices",JSON.stringify(devices));localStorage.setItem("mf_lab_url",appUrl);localStorage.setItem("mf_lab_layout",layout)}
+function sel(){return devices.find(d=>d.id===selectedId)||devices[0]}
+function renderPresets(){let el=document.getElementById("presets");el.innerHTML="";presets.forEach(p=>{let b=document.createElement("button");b.className="preset";b.innerHTML=`<strong>${p[0]}</strong><span>${p[1]}×${p[2]}</span>`;b.onclick=()=>{let d=sel();d.name=p[0];d.w=p[1];d.h=p[2];d.z=d.w>900?60:d.w>700?75:100;save();render()};el.appendChild(b)})}
+function render(){save();document.getElementById("urlLabel").textContent=appUrl;workspace.className="workspace "+(layout==="single"?"single":"");workspace.innerHTML="";(layout==="single"?devices.filter(d=>d.id===selectedId):devices).forEach(d=>{let card=document.createElement("article");card.className="device"+(d.id===selectedId?" selected":"");card.style.width=Math.max(280,d.w*(d.z/100)+48)+"px";card.style.height=Math.max(420,d.h*(d.z/100)+94)+"px";card.onclick=e=>{if(e.target.tagName!=="BUTTON"){selectedId=d.id;render()}};card.innerHTML=`<div class="device-head"><div class="device-title"><strong>${d.name}</strong><span>${d.w} × ${d.h} · ${d.z}%</span></div><div class="actions"><button>↔</button><button>⧉</button><button>×</button></div></div><div class="shell"><iframe src="${appUrl}" style="width:${d.w}px;height:${d.h}px;transform:scale(${d.z/100})"></iframe></div>`;let bs=card.querySelectorAll("button");bs[0].onclick=e=>{e.stopPropagation();selectedId=d.id;rotate()};bs[1].onclick=e=>{e.stopPropagation();selectedId=d.id;duplicate()};bs[2].onclick=e=>{e.stopPropagation();selectedId=d.id;removeDevice()};workspace.appendChild(card)});syncInputs()}
+function syncInputs(){let d=sel();document.getElementById("w").value=d.w;document.getElementById("h").value=d.h;document.getElementById("z").value=d.z;document.getElementById("n").value=d.name}
+function applyInputs(){let d=sel();d.w=+document.getElementById("w").value||d.w;d.h=+document.getElementById("h").value||d.h;d.z=+document.getElementById("z").value||d.z;d.name=document.getElementById("n").value||d.name;render()}
+function rotate(){let d=sel();[d.w,d.h]=[d.h,d.w];render()}
+function duplicate(){let d=sel();let c={...d,id:crypto.randomUUID(),name:d.name+" copie"};devices.push(c);selectedId=c.id;render()}
+function removeDevice(){if(devices.length<=1)return;devices=devices.filter(d=>d.id!==selectedId);selectedId=devices[0].id;render()}
+function addDevice(){let d={id:crypto.randomUUID(),name:"Custom",w:390,h:844,z:100};devices.push(d);selectedId=d.id;render()}
+function reloadAll(){document.querySelectorAll("iframe").forEach(f=>f.src=f.src)}
+function changeUrl(){let n=prompt("URL locale de l’app :",appUrl);if(n){appUrl=n.trim();render()}}
+function fitSelected(){let d=sel();d.w=Math.max(320,workspace.clientWidth-140);d.h=Math.max(520,workspace.clientHeight-130);d.z=100;render()}
+renderPresets();render();
+</script>
+</body>
+</html>

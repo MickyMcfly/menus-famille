@@ -1,3 +1,10 @@
 {
-  "version": "12.5"
+  "version": "14.1.1",
+  "subtitle": "Tags Lunch Bureau corrigés",
+  "whatsNew": [
+    "Correction de l’erreur de démarrage de la v14.1.",
+    "Ajout des tags Lunch Bureau.",
+    "Bouton filtre Lunch Bureau dans les recettes.",
+    "Tags visuels : Express, Placard, Micro-ondes OK, Équilibré, Protéiné."
+  ]
 }
