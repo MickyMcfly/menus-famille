@@ -1,8 +1,4 @@
-v12.5 - optimisation responsive totale
-- Adaptation globale mobile / tablette
-- Header plus souple
-- Grilles qui passent en 1 colonne sur petit écran
-- Modales adaptées aux petits écrans
-- Boutons tactiles minimum 44px
-- Anti-scroll horizontal
-- Marqueur visible : MARQUEUR BUILD v12.5
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
+createRoot(document.getElementById("root")).render(<React.StrictMode><App /></React.StrictMode>);
